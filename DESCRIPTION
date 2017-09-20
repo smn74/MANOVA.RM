@@ -1,0 +1,34 @@
+Package: MANOVA.RM
+Type: Package
+Title: Analysis of Multivariate Data and Repeated Measures Designs
+Version: 0.1.3
+Date: 2017-09-19
+Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
+Maintainer: Sarah Friedrich <sarah.friedrich@uni-ulm.de>
+Depends: 
+    R (>= 3.2.3)    
+Description: Implemented are various tests for semi-parametric repeated measures
+    and general MANOVA designs that do neither assume multivariate normality nor
+    covariance homogeneity, i.e., the procedures are applicable for a wide range
+    of general multivariate factorial designs.
+License: GPL-2 | GPL-3
+Imports: 
+    plyr (>= 1.8.3),
+    MASS (>= 7.3-43),
+    Matrix (>= 1.2-2),
+    magic (>= 1.5-6),
+    plotrix (>= 3.5-12),
+    parallel,
+    methods,
+    ellipse
+LazyData: TRUE
+Suggests: 
+    RGtk2 (>= 2.20.31),
+    knitr,
+    rmarkdown,
+    HSAUR,
+    tidyr,
+    GFD
+RoxygenNote: 5.0.1
+VignetteBuilder: knitr, rmarkdown
+
