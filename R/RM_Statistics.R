@@ -97,7 +97,13 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
     
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
-    return(WTPS)
+    # ATS
+    C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
+    D <- diag(C) * diag(ncol(C))
+    spur <- sum(diag(C %*% SnP))
+    Lambda <- diag(1 / (n - 1))
+    ATS_res <- N / spur * t(meansP) %*% C %*% meansP
+    return(list(WTPS, ATS_res))
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
@@ -149,9 +155,10 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
       parallel::clusterSetRNGStream(cl, iseed = seed)
     }
     WTPS <- parSapply(cl, 1:iter, FUN = PBS)
-    ecdf_WTPS <- ecdf(WTPS)
+    ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
-    p_valueATS_res <- NA
+    ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
+    p_valueATS_res <- 1-ecdf_ATS_res(ATS)
   } else if(resampling == "WildBS"){
     if(seed != 0){
       parallel::clusterSetRNGStream(cl, iseed = seed)

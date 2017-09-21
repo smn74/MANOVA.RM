@@ -37,7 +37,7 @@ detected via \code{\link[parallel]{detectCores}}.}
 reproducible seed is set.}
 
 \item{CI.method}{The method for calculating the quantiles used for the confidence intervals, 
-either "t-quantile" (the default) or "resampling".}
+either "t-quantile" (the default) or "resampling" (the quantile of the resampled WTS).}
 
 \item{dec}{Number of decimals the results should be rounded to. Default is 3.}
 }

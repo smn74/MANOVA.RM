@@ -24,7 +24,7 @@
 #' @param seed A random seed for the resampling procedure. If omitted, no 
 #'   reproducible seed is set.
 #' @param CI.method The method for calculating the quantiles used for the confidence intervals, 
-#'  either "t-quantile" (the default) or "resampling".
+#'  either "t-quantile" (the default) or "resampling" (the quantile of the resampled WTS).
 #' @param dec Number of decimals the results should be rounded to. Default is 3.
 #'   
 #' @details The RM() function provides the Wald-type

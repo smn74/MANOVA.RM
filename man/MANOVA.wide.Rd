@@ -42,8 +42,8 @@ see the GFD package and the corresponding vignette.}
 See \code{\link{MANOVA}}
 }
 \description{
-The MANOVA.wide function calculates the Wald-type statistic (WTS), the ANOVA-type 
-statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
+The MANOVA.wide function calculates the Wald-type statistic (WTS)
+ and a modified ANOVA-type statistic (MATS) as well as resampling versions of 
 these test statistics for 
 semi-parametric multivariate data provided in wide format.
 }
