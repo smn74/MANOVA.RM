@@ -53,7 +53,7 @@ set to 'Perm'.
 * `CPU`: The number of cores used for parallel computing. If omitted, cores are detected via \code{\link[parallel]{detectCores}}.
 * `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
 * `CI.method`: The method for calculating the quantiles used for the confidence intervals, 
-  either 't-quantile' (the default) or 'resampling'.
+  either 't-quantile' (the default) or 'resampling' (based on quantile of the resampled WTS).
 * `dec`: The number of decimals the results should be rounded to. Default is 3.
 
 ```{r}
@@ -71,7 +71,7 @@ are displayed. Note that the $\chi^2$ approximation is very liberal for small sa
 This test statistic tends to rather
 conservative decisions in case of small sample sizes and is even asymptotically only an approximation, thus not providing an asymptotic level $\alpha$ test.
 Finally, `model1$resampling` contains the p-values based on 
-the chosen resampling approach. For the ATS, only the wild bootstrap procedure can be applied.
+the chosen resampling approach. For the ATS, the permutation procedure cannot be applied.
 Due to the above mentioned issues for small sample sizes, the resampling procedure is recommended for such situations.
 
 ### Data Example 2 (Two sub-plot and two whole-plot factors)
