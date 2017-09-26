@@ -41,6 +41,7 @@ head(o2cons)
 
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
+
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side. An interaction term must be specified. The time variable must be the last factor in the formula.
 * `data`: A data.frame, list or environment containing the variables in `formula`.
@@ -131,6 +132,7 @@ some groups (e.g., only 2 male patients aged $<$ 70 were diagnosed with AD) we r
 The analysis of this example is shown below.
 
 The `MANOVA` function takes as arguments:
+
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side. An interaction term must be specified.
 * `data`: A data.frame, list or environment containing the variables in `formula`.
@@ -188,6 +190,7 @@ Details on the methods can be found in Friedrich and Pauly (2017).
 
 Confidence regions can be calculated using the `conf.reg` function. Note that confidence regions can only be plotted in designs with 2 dimensions.
 The `conf.reg` function takes as arguments:
+
 * `object`: A `MANOVA` object calculated via `MANOVA()`.
 * `nullhypo`: In designs involving more than one factor, it is necessary to specify the null hypothesis, i.e., the contrast of interest.
 

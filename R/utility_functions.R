@@ -76,8 +76,6 @@ summary.MANOVA <- function (object, ...) {
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
   print(object$WTS)
-  #  cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  #  print(object$ATS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
   print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
@@ -110,4 +108,9 @@ summary.RM <- function (object, ...) {
   print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   print(object$resampling)
+}
+
+#' @export 
+plot.MANOVA <- function(object, ...){
+  stop("There is no plotting routine for MANOVA objects.")
 }

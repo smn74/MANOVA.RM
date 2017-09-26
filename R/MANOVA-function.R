@@ -143,16 +143,13 @@ MANOVA <- function(formula, data, subject,
     n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(unique(subject)),
                      .drop = F)$Measure
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
- #   ATS_out <- matrix(NA, ncol = 4, nrow = 1)
     MATS_out <- NA
     WTPS_out <- rep(NA, 2)
     quantiles <- matrix(NA, 2, 1)
     rownames(WTS_out) <- fac_names
-  #  rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat(data = response, n = n, hypo, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
     WTS_out <- round(results$WTS, dec)
-#    ATS_out <- results$ATS
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
     quantiles <- results$quantiles
@@ -163,14 +160,12 @@ MANOVA <- function(formula, data, subject,
     colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
-  #  names(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive
     output$Covariance <- Var_out
     output$WTS <- WTS_out
-#    output$ATS <- ATS_out
     output$MATS <- MATS_out
     output$resampling <- WTPS_out
     output$quantile <- quantiles
@@ -264,16 +259,13 @@ MANOVA <- function(formula, data, subject,
     
     n.groups <- prod(fl)
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
-  #  ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
     WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)
     MATS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 1)
     quantiles <- matrix(NA, ncol = 2, nrow = length(hypo_matrices))
     rownames(WTS_out) <- fac_names
- #   rownames(ATS_out) <- fac_names
     rownames(WTPS_out) <- fac_names
     rownames(MATS_out) <- fac_names
     rownames(quantiles) <- fac_names
- #   colnames(ATS_out) <- c("Test statistic", "df1", "df2", "p-value")
     colnames(MATS_out) <- "Test statistic"
     colnames(quantiles) <- c("WTS_resampling", "MATS_resampling")
     # calculate results
@@ -281,7 +273,6 @@ MANOVA <- function(formula, data, subject,
       results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
                              iter, alpha, resampling, n.groups, p, CPU, seed, nf)
       WTS_out[i, ] <- round(results$WTS, dec)
-  #    ATS_out[i, ] <- results$ATS
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)
       quantiles[i, ] <- results$quantiles
@@ -304,14 +295,12 @@ MANOVA <- function(formula, data, subject,
     output$Means <- mean_out
     output$MATS <- MATS_out
     output$WTS <- WTS_out
-  #  output$ATS <- ATS_out
     output$resampling <- WTPS_out
     output$quantile <- quantiles
     output$nf <- nf
     output$H <- hypo_matrices
     output$factors <- fac_names
     output$p <- p
-    output$fl <- fl
   }
   class(output) <- "MANOVA"
   return(output)
