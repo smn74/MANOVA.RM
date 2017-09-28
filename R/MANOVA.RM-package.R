@@ -4,21 +4,23 @@
 #'The MANOVA.RM package provides two important functions: MANOVA() and RM() which 
 #'will be explained in detail below.
 #'
-#'@section MANOVA function: The MANOVA() function provides the Wald-type
-#'  statistic (WTS), the ANOVA-type statistic (ATS) as well as a modified ANOVA-type statistic (MATS)
+#'@section MANOVA and MANOVA.wide function: The MANOVA() and MANOVA.wide() functions provide
+#'  the Wald-type statistic (WTS) as well as a modified ANOVA-type statistic (MATS)
 #'  as in Friedrich and Pauly (2017)
 #'  for multivariate designs with metric data as described in 
-#'  Konietschke et al. (2015). These are even applicable
+#'  Konietschke et al. (2015). These are applicable
 #'  for non-normal error terms, different sample sizes and/or
 #'  heteroscedastic variances. The MATS can even handle designs involving singular
 #'  covariance matrices. The tests are implemented for designs with an arbitrary
 #'  number of crossed factors or for nested designs. In addition to the
 #'  asymptotic p-values, they also provide p-values based on resampling
-#'  approaches (parametric or wild bootstrap).
-#'  For further details, see \code{MANOVA}.
+#'  approaches (parametric or wild bootstrap). The difference between the two functions
+#'  is the format of the data: For MANOVA(), the data needs to be in long format,
+#'  while MANOVA.wide() is for data in wide format.
+#'  For further details, see \code{MANOVA} and \code{MANOVA.wide}.
 #'  
 #'@section RM function: The RM() function provides the Wald-type
-#'  statistic as well as the ANOVA-type statistic for repeated measures designs
+#'  statistic (WTS) as well as the ANOVA-type statistic (ATS) for repeated measures designs
 #'  with metric data as described in Friedrich et al. (2017).
 #'  These are even applicable for non-normal error terms and/or heteroscedastic
 #'  variances. It is implemented for designs with an arbitrary number of
@@ -35,8 +37,8 @@
 #'  in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #'  
 #'  Friedrich, S., Konietschke, F., Pauly, M. (2016). GFD - An
-#'  R-package for the Analysis of General Factorial Designs. Accepted for publication in
-#'  Journal of Statistical Software.
+#'  R-package for the Analysis of General Factorial Designs. 
+#'  Journal of Statistical Software, 79(1), 1-18.
 #'  
 #'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. 
 #'  and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
@@ -47,5 +49,5 @@
 #'  heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
 #'  
 #'@docType package
-#'@name MANOVA.RM-package
+#'@name MANOVARM
 NULL
