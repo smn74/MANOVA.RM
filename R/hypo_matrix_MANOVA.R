@@ -23,6 +23,11 @@ HC_MANOVA <- function(fl, perm_names, names, p){
     tmp <- c(tmp, choose(nf, i))
     nh <- sum(tmp)
   }
+  
+  if (nrow(perm_names) != nh) {
+    stop("For crossed designs, an interaction term must be specified in the formula.")
+  }
+  
   # calculate the permutation of the names
   Z <- 0:(nf - 1)
   position <- rep(0, nh)

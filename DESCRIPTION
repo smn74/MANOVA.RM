@@ -6,7 +6,7 @@ Date: 2017-09-26
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@uni-ulm.de>
 Depends:
-    R (>= 3.2.3)    
+    R (>= 3.4.1)    
 Description: Implemented are various tests for semi-parametric repeated measures
     and general MANOVA designs that do neither assume multivariate normality nor
     covariance homogeneity, i.e., the procedures are applicable for a wide range

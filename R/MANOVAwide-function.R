@@ -146,8 +146,10 @@ MANOVA.wide <- function(formula, data,
    
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
-
-    if (length(fac_names) == nf) {
+    
+    nested <- grepl(":", formula)
+    
+    if (sum(nested) > 0) {
       # nested
       
       # if nested factor is named uniquely
@@ -210,7 +212,7 @@ MANOVA.wide <- function(formula, data,
            not implemented!")
     }
     # only 3-way nested designs are possible
-    if (length(fac_names) == nf && nf >= 4) {
+    if (sum(nested) > 0 && nf >= 4) {
       stop("Four- and higher way nested designs are
            not implemented!")
     }
@@ -218,10 +220,6 @@ MANOVA.wide <- function(formula, data,
     if (0 %in% n || 1 %in% n) {
       stop("There is at least one factor-level combination
            with less than 2 observations!")
-    }
-    
-    if (length(fac_names) != length(hypo_matrices)) {
-      stop("Something is wrong: Perhaps a missing interaction term in formula?")
     }
     
     #--------------------------------------------------------------------------#
