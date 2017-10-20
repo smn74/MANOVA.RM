@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.2.1
-Date: 2017-09-26
+Version: 0.2.2
+Date: 2017-10-16
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@uni-ulm.de>
 Depends:

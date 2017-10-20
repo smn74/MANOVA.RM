@@ -111,6 +111,6 @@ summary.RM <- function (object, ...) {
 }
 
 #' @export 
-plot.MANOVA <- function(object, ...){
+plot.MANOVA <- function(x, ...){
   stop("There is no plotting routine for MANOVA objects.")
 }

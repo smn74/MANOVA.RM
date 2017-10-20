@@ -161,6 +161,7 @@ MANOVA <- function(formula, data, subject,
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    colnames(MATS_out) <- "Test statistic"
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive
@@ -285,6 +286,7 @@ MANOVA <- function(formula, data, subject,
     # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    colnames(MATS_out) <- "Test statistic"
     output <- list()
     output$time <- time
     output$input <- input_list
@@ -300,6 +302,13 @@ MANOVA <- function(formula, data, subject,
     output$factors <- fac_names
     output$p <- p
   }
+  
+  # check for singular covariance matrix
+  test <- try(solve(output$Covariance), silent = TRUE)
+  if(!is.matrix(test)){
+    warning("The covariance matrix is singular. The WTS provides no valid test statistic!")
+  }
+  
   class(output) <- "MANOVA"
   return(output)
 }

@@ -1,3 +1,6 @@
+# MANOVA.RM 0.2.2
+* warning message for singular covariance matrices
+
 # MANOVA.RM 0.2.1
 * improved plotting routine for RM models, now allowing for more user-specified parameters
 * parametric bootstrap now also implemented for the ATS in RM-Designs
