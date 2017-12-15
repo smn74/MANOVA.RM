@@ -43,7 +43,7 @@ plot.RM <- function (x, ...) {
   xmax <- ncol(h$y)+ nrow(h$y)*gap
   # default values
   args <- list(h,
-               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(fac.names),
+               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(h$legend),
                pch = 1:18, legendpos = "topright", xlim = c(0.8, xmax + 0.1),
                ylim =c(min(h$li), max(h$ui)), gap = 0.1, xaxt = "n", ax)
   
