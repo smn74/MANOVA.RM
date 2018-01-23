@@ -1,10 +1,15 @@
-# MANOVA.RM 0.1.3
+# MANOVA.RM 0.2.2
+* warning message for singular covariance matrices
+
+# MANOVA.RM 0.2.1
 * improved plotting routine for RM models, now allowing for more user-specified parameters
+* parametric bootstrap now also implemented for the ATS in RM-Designs
 * excluded calculation for ATS in multivariate settings (no sensible test statistic in this context)
-* include factor AgeGroup in EEGwide data
 * fixed some bugs in ordering of data for multivariate higher-way layouts
 and setting of random seed in permutation procedure
-* CIs can now also be calculated using the resampling quantiles
+* CIs can now also be calculated using the resampling quantiles of the WTS
+* include factor AgeGroup in EEGwide data
+
 
 # MANOVA 0.1.2
 * included EEG data example in wide format

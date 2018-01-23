@@ -1,6 +1,6 @@
 xaxt <- NULL
 #' @export 
-plot.RM <- function (x, ...) {
+plot.RM <- function (x, CI.info = FALSE, ...) {
   
   object <- x
   dots <- list(...)
@@ -49,6 +49,15 @@ plot.RM <- function (x, ...) {
   
   args[names(dots)] <- dots
   do.call(newplotting, args = args)
+  
+  if (CI.info == TRUE){
+    CI.out <- list()
+    CI.out$mean <- h$y
+    CI.out$lower <- h$li
+    CI.out$upper <- h$ui
+    return(CI.out)
+  }
+  
 }
 
 #' @export
