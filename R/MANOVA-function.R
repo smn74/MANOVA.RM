@@ -29,7 +29,7 @@
 #'   
 #' @details The MANOVA() function provides the Wald-type statistic (WTS) as well as
 #'   the modified ANOVA-type statistic (MATS) for multivariate designs with metric data as described in 
-#'   Konietschke et al. (2015) and Friedrich and Pauly (2017), respectively. The MATS is invariant
+#'   Konietschke et al. (2015) and Friedrich and Pauly (2018), respectively. The MATS is invariant
 #'   under scale transformations of the components and applicable to designs with singular covariance
 #'   matrices.
 #'   Both tests are applicable for non-normal error terms, 
@@ -68,16 +68,17 @@
 #'   Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
 #'   in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #'   
-#'    Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016).
-#'    Using EEG, SPECT, and Multivariate Resampling Methods
-#'    to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+#'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+#'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+#'   Doi: 10.1080/00273171.2018.1446320.
 #'   
 #'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
 #'   R-package for the Analysis of General Factorial Designs. 
 #'   Journal of Statistical Software, 79(1), 1-18.
 #'   
-#'   Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
-#'   heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
+#'   Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
+#'   heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 #'    
 #'   
 #' @importFrom graphics axis legend par plot title abline points

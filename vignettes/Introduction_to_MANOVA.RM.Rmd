@@ -13,13 +13,18 @@ and small sample sizes.
 Furthermore, different resampling approaches are provided in order to improve the
 small sample behavior of the test statistics. 
 
+## Difference between RM and MANOVA design
+
+* In a repeated measures designs (RM) the same outcome is observed at different occasions, e.g., different time points or different parts of the body like left/right hemisphere of the brain. Hypotheses about the sub-plot or within subjects factors are possible.
+* In a MANOVA design, d-dimensional outcome vectors are observed for every subject. These outcomes are potentially measured on different scales (e.g., kg, m, heart rate, ...) and hypotheses are formulated on the whole outcome vectors. The only difference between the functions `MANOVA` and `MANOVA.wide` is the format of the data: For `MANOVA` data need to be in long format (one row per measurement), whereas `MANOVA.wide` is for data in wide format (one row per individual).
+
+
 ## The `RM` function
 
-The `RM` function calculates the above mentioned test statistics in a repeated measures design with an arbitrary number of crossed whole-plot and 
-sub-plot factors.
+The `RM` function calculates the above mentioned test statistics in a repeated measures design with an arbitrary number of crossed whole-plot (between subjects) and 
+sub-plot (within subjects) factors.
 The resampling methods provided are a permutation procedure, a parametric bootstrap approach and a
 wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS.
-
 
 ### Data Example 1 (One whole-plot and two sub-plot factors)
 
@@ -31,7 +36,7 @@ data(o2cons)
 ```
 
 The data set contains measurements on the oxygen consumption of leukocytes in the presence and absence of inactivated staphylococci 
-at three consecutive time points. More details on the study can be found in Friedrich et al. (2017).
+at three consecutive time points. More details on the study and the statistical model can be found in Friedrich et al. (2017).
 Due to the study design, both time and staphylococci are sub-plot factors while the treatment (Verum vs. Placebo) is a whole-plot
 factor.
 

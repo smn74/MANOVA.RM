@@ -1,5 +1,11 @@
+# MANOVA.RM 0.2.3
+* add documentation for S3 methods
+* improve documentation in vignette
+* fix handling of variables coded as factors in nested designs
+
 # MANOVA.RM 0.2.2
 * warning message for singular covariance matrices
+* implement output of confidence intervals for interactions (RM design, option: CI.info in plot(...))
 
 # MANOVA.RM 0.2.1
 * improved plotting routine for RM models, now allowing for more user-specified parameters

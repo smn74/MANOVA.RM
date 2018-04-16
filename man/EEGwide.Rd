@@ -18,8 +18,10 @@
   \item{AgeGroup}{categorized age, coded as 0 for less than 70 years and 1 for \eqn{>= 70} years}
 }}
 \source{
-Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+  Doi: 10.1080/00273171.2018.1446320.
 }
 \usage{
 data(EEGwide)

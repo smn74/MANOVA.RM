@@ -18,11 +18,15 @@
 #' conf.reg(EEG_mod, nullhypo = "sex")
 #' 
 #' 
-#' @references Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and 
-#'   heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
+#' @references Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and 
+#'   heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 #'
 #' @export
 conf.reg <- function(object, nullhypo){
+  
+  if(class(object) != "MANOVA"){
+    stop("Object must be of class MANOVA")
+  }
   
   confreg <- list()
 

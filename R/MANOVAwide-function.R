@@ -161,7 +161,7 @@ MANOVA.wide <- function(formula, data,
         blev <- list()
         lev_names <- list()
         for (ii in 1:length(levels[[1]])) {
-          blev[[ii]] <- levels(as.factor(dat[, 3][dat[, 2] == levels[[1]][ii]]))
+          blev[[ii]] <- droplevels(as.factor(dat[, 3][dat[, 2] == levels[[1]][ii]]))
           lev_names[[ii]] <- rep(levels[[1]][ii], length(blev[[ii]]))
         }
         if (nf == 2) {

@@ -13,7 +13,9 @@
 #' 
 #' @usage data(o2cons)
 #' 
-#' @source Friedrich, S., Brunner, E. and Pauly, M. (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+#' @source Friedrich, S., Brunner, E. & Pauly, M. (2017). 
+#' Permuting longitudinal data in spite of the dependencies. 
+#' Journal of Multivariate Analysis, 153, 255-265.
 "o2cons"
 
 #' EEG Measurements in Patients with Alzheimer's Disease (long format)
@@ -41,8 +43,11 @@
 #' 
 #' @usage data(EEG)
 #' 
-#' @source  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-#' to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+#' @source  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+#'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+#'   Doi: 10.1080/00273171.2018.1446320.
+#'   
 "EEG"
 
 
@@ -74,6 +79,9 @@
 #' 
 #' @usage data(EEGwide)
 #' 
-#' @source  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-#' to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+#' @source  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+#'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+#'   Doi: 10.1080/00273171.2018.1446320.
+#'   
 "EEGwide"

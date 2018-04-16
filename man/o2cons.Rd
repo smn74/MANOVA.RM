@@ -13,7 +13,9 @@
   \item{Subject}{the subject id}
 }}
 \source{
-Friedrich, S., Brunner, E. and Pauly, M. (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+Friedrich, S., Brunner, E. & Pauly, M. (2017). 
+Permuting longitudinal data in spite of the dependencies. 
+Journal of Multivariate Analysis, 153, 255-265.
 }
 \usage{
 data(o2cons)
