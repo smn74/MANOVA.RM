@@ -4,7 +4,7 @@
 # p: Number of dimensions
 
 #--------------------- crossed designs ------------------------------
-HC_MANOVA <- function(fl, perm_names, names, p){
+HC_MANOVA <- function(fl, perm_names, names, p, nh){
   nf <- length(fl)
   # centering matrix
   P <- function(x){
@@ -15,17 +15,6 @@ HC_MANOVA <- function(fl, perm_names, names, p){
   One <- function(x){
     I <- matrix(1 / x, ncol = x, nrow = x)
     return(I)
-  }
-  
-  # number of hypotheses
-  tmp <- 0
-  for (i in 1:nf) {
-    tmp <- c(tmp, choose(nf, i))
-    nh <- sum(tmp)
-  }
-  
-  if (nrow(perm_names) != nh) {
-    stop("For crossed designs, an interaction term must be specified in the formula.")
   }
   
   # calculate the permutation of the names

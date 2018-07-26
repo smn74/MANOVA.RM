@@ -9,7 +9,7 @@
 #'   variables of interest. An interaction term must be specified. The time variable
 #'   must be the last factor in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}. Data must be in long format.
+#'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data.
 #' @param no.subf The number of sub-plot factors in the data, default is 1.
 #' @param iter The number of iterations used for calculating the resampled 
@@ -124,6 +124,10 @@ RM <- function(formula, data, subject,
     stop("The subject variable is not found!")
   }
   subject <- data[, subject]
+  if (length(subject) != nrow(dat)){
+    stop("There are missing values in the data.")
+  }
+  
   dat2 <- data.frame(dat, subject = subject)
   nf <- ncol(dat) - 1
   nadat <- names(dat)
@@ -298,6 +302,13 @@ RM <- function(formula, data, subject,
                                 "lower", "upper", "fac_names_original", "dat2", "fl",
                                 "alpha", "nadat2", "lev_names")
   }
+  
+  # check for singular covariance matrix
+  test <- try(solve(output$Covariance), silent = TRUE)
+  if(!is.matrix(test)){
+    warning("The covariance matrix is singular. The WTS provides no valid test statistic!")
+  }
+  
   class(output) <- "RM"
   return(output)
 }

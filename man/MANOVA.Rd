@@ -14,7 +14,7 @@ contains the response variable and the right hand side contains the factor
 variables of interest. An interaction term must be specified.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}. Data must be in long format.}
+\code{formula}. Data must be in long format and must not contain missing values.}
 
 \item{subject}{The column name of the subjects in the data.}
 
@@ -75,6 +75,7 @@ The MANOVA() function provides the Wald-type statistic (WTS) as well as
 restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
 For more information and detailed examples also refer to the package vignette.
 }
+
 \examples{
 data(EEG)
 EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
@@ -106,4 +107,3 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
 \seealso{
 \code{\link{RM}}
 }
-

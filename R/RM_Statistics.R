@@ -173,7 +173,7 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   parallel::stopCluster(cl)
   
   #------------------------ resampling quantile -------------------#
-  quant_WTS <- quantile(ecdf_WTPS, alpha)
+  quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
   
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)

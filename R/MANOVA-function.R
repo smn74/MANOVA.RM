@@ -9,7 +9,7 @@
 #'   contains the response variable and the right hand side contains the factor 
 #'   variables of interest. An interaction term must be specified.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}. Data must be in long format.
+#'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
@@ -82,7 +82,7 @@
 #'    
 #'   
 #' @importFrom graphics axis legend par plot title abline points
-#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom quantile
+#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom quantile as.formula
 #' @importFrom utils read.table
 #' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
@@ -97,6 +97,10 @@ MANOVA <- function(formula, data, subject,
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
+  }
+  
+  if(sum(grepl("cbind", formula)) != 0){
+    stop("For data in wide format, please use function MANOVA.wide()")
   }
   
   input_list <- list(formula = formula, data = data,
@@ -118,6 +122,10 @@ MANOVA <- function(formula, data, subject,
     stop("The subject variable is not found!")
   }
   subject <- data[, subject]
+  if (length(subject) != nrow(dat)){
+    stop("There are missing values in the data.")
+  }
+  
   # no. of dimensions 
   p <- length(subject)/length(unique(subject))
   dat2 <- data.frame(dat, subject = subject)
@@ -133,6 +141,14 @@ MANOVA <- function(formula, data, subject,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  
+  # number of hypotheses
+  tmp <- 0
+  for (i in 1:nf) {
+    tmp <- c(tmp, choose(nf, i))
+    nh <- sum(tmp)
+  }
+  
   if (nf == 1) {
     # one-way layout
     nr_hypo <- attr(terms(formula), "factors")
@@ -140,7 +156,7 @@ MANOVA <- function(formula, data, subject,
     dat2 <- dat2[order(dat2[, 2], dat2$subject), ]
     response <- dat2[, 1]    
     # contrast matrix
-    hypo <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
+    hypo_matrices <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
     n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(unique(subject)),
                      .drop = F)$Measure
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
@@ -149,7 +165,7 @@ MANOVA <- function(formula, data, subject,
     quantiles <- matrix(NA, 2, 1)
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat(data = response, n = n, hypo, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
+    results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
     WTS_out <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
@@ -163,26 +179,13 @@ MANOVA <- function(formula, data, subject,
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     colnames(MATS_out) <- "Test statistic"
-    output <- list()
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$WTS <- WTS_out
-    output$MATS <- MATS_out
-    output$resampling <- WTPS_out
-    output$quantile <- quantiles
-    output$nf <- nf
-    output$factors <- fac_names
-    output$H <- hypo
-    output$p <- p
-    output$fl <- fl
-    output$Means <- mean_out
     # end one-way layout ------------------------------------------------------
   } else {
     dat2 <- dat2[do.call(order, dat2[, 2:(nf + 2)]), ]
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
     response <- dat2[, 1]
     nr_hypo <- attr(terms(formula), "factors")
+    outcome_names <- rownames(nr_hypo)[1]  # names of outcome variables
     fac_names <- colnames(nr_hypo)
     fac_names_original <- fac_names
     perm_names <- t(attr(terms(formula), "factors")[-1, ])
@@ -191,9 +194,15 @@ MANOVA <- function(formula, data, subject,
                      .drop = F)
     n <- n$Measure/p
     
-    nested <- grepl(":", formula)
+    # correct formula?
+    if (length(fac_names) != nf && length(fac_names) != nh){
+      stop("Something is wrong with the formula. Please specify all or no interactions.")
+    }
     
-    if (sum(nested) > 0) {
+    nested <- grepl(":", formula)
+    nested2 <- grepl("%in%", formula)
+    
+    if (sum(nested) > 0 || sum(nested2) > 0){
       # nested
       
       # if nested factor is named uniquely
@@ -232,10 +241,27 @@ MANOVA <- function(formula, data, subject,
       hypo_matrices <- HN_MANOVA(fl, p)
     } else {
       # crossed
-      hypo_matrices <- HC_MANOVA(fl, perm_names, fac_names, p)[[1]]
-      fac_names <- HC_MANOVA(fl, perm_names, fac_names, p)[[2]]
+      
+      ## adapting formula argument, if interaction term missing
+      
+      if (nrow(perm_names) != nh) {
+        #stop("For crossed designs, an interaction term must be specified in the formula.")
+        form2 <- as.formula(paste(outcome_names, "~", paste(fac_names, collapse = "*")))
+        perm_names2 <- t(attr(terms(form2), "factors")[-1, ])
+        fac_names2 <- attr(terms(form2), "term.labels")
+        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p, nh)
+        hypo_matrices <- hyps[[1]]
+        fac_names2 <- hyps[[2]]
+        # choose only relevant entries of the hypo matrices
+        indices <- grep(":", fac_names2, invert = T)
+        hypo_matrices <- lapply(indices, function(x) hypo_matrices[[x]])
+        
+      } else {
+        hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
+        hypo_matrices <- hyps[[1]]
+        fac_names <- hyps[[2]]
     }
-    
+    }
     # ---------------------- error detection ------------------------------------
     
     # mixture of nested and crossed designs is not possible
@@ -283,11 +309,12 @@ MANOVA <- function(formula, data, subject,
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
-    
-    # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     colnames(MATS_out) <- "Test statistic"
+    
+  }
+  # Output ------------------------------------------------------
     output <- list()
     output$time <- time
     output$input <- input_list
@@ -302,7 +329,11 @@ MANOVA <- function(formula, data, subject,
     output$H <- hypo_matrices
     output$factors <- fac_names
     output$p <- p
-  }
+    output$fl <- fl
+    output$BSMeans <- results$BSmeans
+    output$BSVar <- results$BSVar
+    output$levels <- lev_names
+  
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

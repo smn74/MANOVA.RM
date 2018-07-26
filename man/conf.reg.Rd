@@ -37,4 +37,3 @@ conf.reg(EEG_mod, nullhypo = "sex")
 Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and 
   heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 }
-

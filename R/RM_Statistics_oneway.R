@@ -109,7 +109,7 @@ RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling,
   }
     
   #------------------------ resampling quantile -------------------#
-  quant_WTS <- quantile(ecdf_WTPS, alpha)
+  quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
   
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)

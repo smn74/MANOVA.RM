@@ -38,4 +38,3 @@ vs. MCI vs. SCC), and age (\eqn{< 70} vs. \eqn{>= 70} years). Additionally, the 
 feature (brain rate, complexity) structure the response vector.
 }
 \keyword{datasets}
-

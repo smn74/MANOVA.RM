@@ -14,7 +14,7 @@ variables of interest. An interaction term must be specified. The time variable
 must be the last factor in the formula.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}. Data must be in long format.}
+\code{formula}. Data must be in long format and must not contain missing values.}
 
 \item{subject}{The column name of the subjects in the data.}
 
@@ -108,4 +108,3 @@ Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
 \seealso{
 \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}
 }
-

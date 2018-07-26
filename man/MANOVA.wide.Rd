@@ -14,7 +14,8 @@ contains the matrix of response variables and the right hand side contains the f
 variables of interest. An interaction term must be specified.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}. Data must be in wide format.}
+\code{formula}. Data must be in wide format. Note: Lines containing missing values will 
+be removed.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
 statistic. The default option is 10,000.}
@@ -51,6 +52,7 @@ semi-parametric multivariate data provided in wide format.
  The number of resampling iterations has been set to 100 in the examples due to run time 
 restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
 }
+
 \examples{
 #Example on producing plastic film from Krzanowski (1998, p. 381), see \\code{\\link{manova.summary}}
 tear <- c(6.5, 6.2, 5.8, 6.5, 6.5, 6.9, 7.2, 6.9, 6.1, 6.3,
@@ -70,4 +72,3 @@ summary(fit)
 \seealso{
 \code{\link{MANOVA}}
 }
-

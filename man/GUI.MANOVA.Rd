@@ -20,4 +20,3 @@ For the resampling methods, the user can choose between a parametric bootstrap a
 (see e.g. Konietschke et al. (2015)) and a Wild bootstrap using Rademacher weights
 (see e.g. Bathke et al. (2016)).
 }
-

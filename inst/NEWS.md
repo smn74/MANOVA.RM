@@ -1,3 +1,9 @@
+# MANOVA.RM 0.2.4
+* formula without interaction term possible
+* warning message for singular covariance matrices (RM)
+* improve output
+* ...
+
 # MANOVA.RM 0.2.3
 * add documentation for S3 methods
 * improve documentation in vignette

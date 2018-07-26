@@ -24,4 +24,3 @@ data(o2cons)
 A dataset containing measurements on the oxygen consumption of leukocytes in the presence and absence of inactivated staphylococci.
 }
 \keyword{datasets}
-

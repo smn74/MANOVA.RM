@@ -9,7 +9,8 @@
 #'   contains the matrix of response variables and the right hand side contains the factor 
 #'   variables of interest. An interaction term must be specified.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}. Data must be in wide format.
+#'   \code{formula}. Data must be in wide format. Note: Lines containing missing values will 
+#'   be removed.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -52,14 +53,19 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3){
+                   seed, nested.levels.unique = FALSE, dec = 3, univariate = FALSE){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
   
+  if(sum(grepl("cbind", formula)) == 0){
+    stop("For data in long format, please use function MANOVA()")
+  }
+  
   input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling)
+                     iter = iter, alpha = alpha, resampling = resampling, univariate = univariate)
+  output <- list()
   
   test1 <- hasArg(CPU)
   if(!test1){
@@ -96,15 +102,31 @@ MANOVA.wide <- function(formula, data,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  # number of hypotheses
+  tmp <- 0
+  for (i in 1:nf) {
+    tmp <- c(tmp, choose(nf, i))
+    nh <- sum(tmp)
+  }
+  
+  # correct formula?
+  if (length(fac_names) != nf && length(fac_names) != nh){
+    stop("Something is wrong with the formula. Please specify all or no interactions in crossed designs.")
+  }
+  # mixture of nested and crossed designs is not possible
+  if (length(fac_names) != nf && 2 %in% nr_hypo) {
+    stop("A model involving both nested and crossed factors is
+           not implemented!")
+  }
   
   if (nf == 1) {
     # one-way layout
     dat2 <- dat[order(dat[, 2]), ]
     fac.groups <- dat2[, 2]
-    n.groups <- prod(fl)
     Y <- split(dat2, fac.groups)
     n <- sapply(Y, nrow)
-    hypo <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
+    Y2 <- sapply(Y, function(x) x$response)
+    hypo_matrices <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
     
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
     MATS_out <- NA
@@ -112,7 +134,8 @@ MANOVA.wide <- function(formula, data,
     quantiles <- matrix(NA, 2, 1)
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat.wide(Y, n = n, hypo, iter = iter, alpha, resampling, CPU, seed)    
+    results <- MANOVA.Stat.wide(Y2, n = n, hypo_matrices, iter = iter, alpha, resampling, 
+                                CPU, seed, p)    
     WTS_out <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
@@ -126,20 +149,23 @@ MANOVA.wide <- function(formula, data,
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     colnames(MATS_out) <- "Test statistic"
-    output <- list()
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$WTS <- WTS_out
-    output$MATS <- MATS_out
-    output$resampling <- WTPS_out
-    output$quantile <- quantiles
-    output$nf <- nf
-    output$factors <- fac_names
-    output$H <- hypo
-    output$p <- p
-    output$fl <- fl
-    output$Means <- mean_out
+    ###
+    ## FUNKTIONIERT NICHT SO EINFACH
+    ####
+    if (univariate){
+       uniresults <- matrix(NA, ncol = p, nrow = 2)
+       for(j in 1:p){
+         Yj <- sapply(Y, function(x) as.matrix(x$response[, j]))
+       uniresults[, j] <- MANOVA.Stat.wide(Yj, n = n, 
+                                      (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)),
+                                      iter = iter, alpha, resampling, CPU, seed, p=1)$WTPS
+       
+       }
+       rownames(uniresults) <- c("WTS", "MATS")
+       colnames(uniresults) <- split3
+       }
+     
+    
     # end one-way layout ------------------------------------------------------
   } else {
     dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
@@ -148,9 +174,10 @@ MANOVA.wide <- function(formula, data,
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
     
-    nested <- grepl(":", formula)
+    nested <- grepl(":", formula) 
+    nested2 <- grepl("%in%", formula)
     
-    if (sum(nested) > 0) {
+    if (sum(nested) > 0 || sum(nested2) > 0) {
       # nested
       
       # if nested factor is named uniquely
@@ -189,7 +216,25 @@ MANOVA.wide <- function(formula, data,
       hypo_matrices <- HN_MANOVA(fl, p)
     } else {
       # crossed
-      hypo_matrices <- HC_MANOVA(fl, perm_names, fac_names, p)[[1]]
+      
+      ## adapting formula argument, if interaction term missing
+      if (nrow(perm_names) != nh) {
+        #stop("For crossed designs, an interaction term must be specified in the formula.")
+        form2 <- as.formula(paste(outcome_names, "~", paste(fac_names, collapse = "*")))
+        perm_names2 <- t(attr(terms(form2), "factors")[-1, ])
+        fac_names2 <- attr(terms(form2), "term.labels")
+        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p, nh)
+        hypo_matrices <- hyps[[1]]
+        fac_names2 <- hyps[[2]]
+        # choose only relevant entries of the hypo matrices
+        indices <- grep(":", fac_names2, invert = T)
+        hypo_matrices <- lapply(indices, function(x) hypo_matrices[[x]])
+        
+      } else {
+        hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
+        hypo_matrices <- hyps[[1]]
+        fac_names <- hyps[[2]]
+      }
     }
     
     n.groups <- prod(fl)
@@ -207,11 +252,6 @@ MANOVA.wide <- function(formula, data,
     
     # ---------------------- error detection ------------------------------------
     
-    # mixture of nested and crossed designs is not possible
-    if (length(fac_names) != nf && 2 %in% nr_hypo) {
-      stop("A model involving both nested and crossed factors is
-           not implemented!")
-    }
     # only 3-way nested designs are possible
     if (sum(nested) > 0 && nf >= 4) {
       stop("Four- and higher way nested designs are
@@ -238,7 +278,7 @@ MANOVA.wide <- function(formula, data,
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat.wide(Y, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, CPU, seed)
+                             iter, alpha, resampling, CPU, seed, p)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)
@@ -248,16 +288,14 @@ MANOVA.wide <- function(formula, data,
     time <- results$time
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    descriptive <- cbind(lev_names, n, mean_out)
+    descriptive <- cbind(unique(lev_names), n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)
     rownames(descriptive) <- NULL
-    
-    # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     colnames(MATS_out) <- "Test statistic"
-    output <- list()
-    output$time <- time
+  }
+  # Output ------------------------------------------------------
     output$input <- input_list
     output$Descriptive <- descriptive
     output$Covariance <- Var_out
@@ -270,7 +308,11 @@ MANOVA.wide <- function(formula, data,
     output$H <- hypo_matrices
     output$factors <- fac_names
     output$p <- p
-  }
+    output$fl <- fl
+    output$BSMeans <- results$BSmeans
+    output$BSVar <- results$BSVar
+    output$levels <- lev_names
+
 
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

@@ -139,7 +139,11 @@ print.RM <- function(x, ...) {
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(object$resampling)
+  if(x$input$resampling == "Perm"){
+    print(object$resampling[, 1, drop = FALSE])
+  } else {
+    print(object$resampling)
+  }
 }
 
 #' Summarizing an RM object
@@ -162,7 +166,11 @@ summary.RM <- function (object, ...) {
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(object$resampling)
+  if(a$resampling == "Perm"){
+    print(object$resampling[, 1, drop = FALSE])
+  } else {
+    print(object$resampling)
+  }
 }
 
 #' @export 

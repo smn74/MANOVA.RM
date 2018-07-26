@@ -22,4 +22,3 @@ parametric bootstrap approach (Konietschke et al. (2015)) and a Wild bootstrap u
 (Bathke et al. (2016)).
 If the plot option is chosen, an additional window opens containing information on the plots.
 }
-
