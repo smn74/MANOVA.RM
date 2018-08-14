@@ -51,8 +51,9 @@
 #'   approach.}
 #' 
 #' @examples data(o2cons)
+#' \dontrun{
 #' oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-#'             subject = "Subject", no.subf = 2, iter = 100, resampling = "Perm", CPU = 1)
+#'             subject = "Subject", no.subf = 2, iter = 1000, resampling = "Perm", CPU = 1)
 #' summary(oxy)
 #' plot(oxy, factor = "Group") 
 #'  
@@ -62,7 +63,7 @@
 #' # using the EEG data, consider additional within-subjects factors 'brain region' 
 #' # and 'feature'
 #' data(EEG)
-#' \dontrun{
+
 #' EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
 #'                data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
 #'                iter = 1000,  alpha = 0.01, CPU = 4, seed = 987, dec = 2)
@@ -76,9 +77,9 @@
 #' 
 #'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
 #'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
 #'   Doi: 10.1080/00273171.2018.1446320.
-#'   ' 
+#'  
 #'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
 #'   R-package for the Analysis of General Factorial Designs. 
 #'   Journal of Statistical Software, 79(1), 1-18.
@@ -228,11 +229,19 @@ RM <- function(formula, data, subject,
       whole_count <- 0
     }
     
-    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
-    fac_names <- HC(fl, perm_names, fac_names)[[2]]
-    if (length(fac_names) != length(hypo_matrices)) {
+    # number of hypotheses
+    tmp <- 0
+    for (i in 1:nf) {
+      tmp <- c(tmp, choose(nf, i))
+      nh <- sum(tmp)
+    }
+    if (length(fac_names) != nh) {
       stop("Something is wrong: Perhaps a missing interaction term in formula?")
     }
+    
+    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
+    fac_names <- HC(fl, perm_names, fac_names)[[2]]
+    
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
     ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
     WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)

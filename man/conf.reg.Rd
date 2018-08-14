@@ -17,7 +17,7 @@ the contrast of interest must be specified.}
 A \code{confreg} object containing the following components: 
   \item{center}{The center of the confidence ellipsoid.}
   \item{scale}{The scaling factors for the axis of the confidence ellipsoid calculated as \eqn{\sqrt{\lambda*c/N}}, where \eqn{\lambda} are the
-  eigenvalues, c denotes the bootstrap quantile and N is the total sample size. See Friedrich and Pauly (2017) for details.}
+  eigenvalues, c denotes the bootstrap quantile and N is the total sample size. See Friedrich and Pauly (2018) for details.}
   \item{eigenvectors}{The corresponding eigenvectors, which determine the axes of the ellipsoid.}
 }
 \description{

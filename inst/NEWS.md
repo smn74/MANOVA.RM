@@ -1,8 +1,10 @@
-# MANOVA.RM 0.2.4
-* formula without interaction term possible
+# MANOVA.RM 0.3.1
+* implementation of post-hoc comparisons
+* formula without interaction term possible (in MANOVA)
 * warning message for singular covariance matrices (RM)
+* improve runtime for permutation
 * improve output
-* ...
+* allow for univariate calculations in MANOVA.wide
 
 # MANOVA.RM 0.2.3
 * add documentation for S3 methods

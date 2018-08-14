@@ -70,7 +70,7 @@
 #'   
 #'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
 #'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359, 
 #'   Doi: 10.1080/00273171.2018.1446320.
 #'   
 #'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
@@ -151,6 +151,7 @@ MANOVA <- function(formula, data, subject,
   
   if (nf == 1) {
     # one-way layout
+    nest <- FALSE
     nr_hypo <- attr(terms(formula), "factors")
     fac_names <- colnames(nr_hypo)
     dat2 <- dat2[order(dat2[, 2], dat2$subject), ]
@@ -204,6 +205,7 @@ MANOVA <- function(formula, data, subject,
     
     if (sum(nested) > 0 || sum(nested2) > 0){
       # nested
+      nest <- TRUE
       
       # if nested factor is named uniquely
       if (nested.levels.unique){
@@ -241,6 +243,7 @@ MANOVA <- function(formula, data, subject,
       hypo_matrices <- HN_MANOVA(fl, p)
     } else {
       # crossed
+      nest <- FALSE
       
       ## adapting formula argument, if interaction term missing
       
@@ -333,6 +336,7 @@ MANOVA <- function(formula, data, subject,
     output$BSMeans <- results$BSmeans
     output$BSVar <- results$BSVar
     output$levels <- lev_names
+    output$nested <- nest
   
   
   # check for singular covariance matrix

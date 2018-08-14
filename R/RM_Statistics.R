@@ -49,12 +49,7 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   #----------------------------Permutation --------------------------------#
   Perm <- function(arg, ...){
     
-    PermMatrix <- matrix(0, nrow = N * n.sub, ncol = iter)
-    for (pp in 1:iter){
-      PermMatrix[, pp] <- sample(1:(N * n.sub), replace = FALSE)
-    }
-    
-    xperm <- x[PermMatrix[, arg]]
+    xperm <- sample(x, replace = FALSE)
     meansP <- A %*% xperm
     VP <- list(NA)
     for(i in 1:n.groups){
@@ -74,7 +69,7 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   }
   
   #--------------------------------- parametric bootstrap ---------------------------#
-  PBS <- function(i, ...){
+  PBS <- function(ii, ...){
     # calculate mvrnorm for each group
     XP <- list()
     meansP <- list()
@@ -107,7 +102,7 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
-  WBS <- function(i, ...){
+  WBS <- function(ii, ...){
     VP <- list(NA)
     xperm <- list(NA)
     for (i in 1:n.groups){
@@ -141,28 +136,22 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   }
   
   cl <- makeCluster(CPU)
+  if(seed != 0){
+    parallel::clusterSetRNGStream(cl, iseed = seed)
+  }
   
   if(resampling == "Perm"){
-    if(seed != 0){
-      parallel::clusterSetRNGStream(cl, iseed = seed)
-    }
     WTPS <- parSapply(cl, 1:iter, FUN = Perm)
     ecdf_WTPS <- ecdf(WTPS)
     p_valueWTPS <- 1-ecdf_WTPS(WTS)
     p_valueATS_res <- NA
   } else if(resampling == "paramBS"){
-    if(seed != 0){
-      parallel::clusterSetRNGStream(cl, iseed = seed)
-    }
     WTPS <- parSapply(cl, 1:iter, FUN = PBS)
     ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
     ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
     p_valueATS_res <- 1-ecdf_ATS_res(ATS)
   } else if(resampling == "WildBS"){
-    if(seed != 0){
-      parallel::clusterSetRNGStream(cl, iseed = seed)
-    }
     WTPS <- parSapply(cl, 1:iter, FUN = WBS)
     ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
@@ -181,8 +170,8 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   
   #---------------------- CIs -------------------------------------#
   if (CI.method == "t-quantile"){
-  CI_lower <- means - sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
-  CI_upper <- means + sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
+    CI_lower <- means - sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
+    CI_upper <- means + sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
   } else if (CI.method == "resampling"){
     CI_lower <- means - sqrt(diag(Sn) / n) * quant_WTS
     CI_upper <- means + sqrt(diag(Sn) / n) * quant_WTS

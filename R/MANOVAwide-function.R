@@ -53,18 +53,14 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3, univariate = FALSE){
+                   seed, nested.levels.unique = FALSE, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
   
-  if(sum(grepl("cbind", formula)) == 0){
-    stop("For data in long format, please use function MANOVA()")
-  }
-  
   input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling, univariate = univariate)
+                     iter = iter, alpha = alpha, resampling = resampling)
   output <- list()
   
   test1 <- hasArg(CPU)
@@ -84,15 +80,19 @@ MANOVA.wide <- function(formula, data,
   
   outcome_names <- rownames(nr_hypo)[1]  # names of outcome variables
   # extract names of outcome variables
+  if (grepl("cbind", outcome_names)){
   split1 <- strsplit(outcome_names, "(", fixed = TRUE)[[1]][-1]
   split2 <- strsplit(split1, ")", fixed = TRUE)[[1]]
   split3 <- strsplit(split2, ",")[[1]]
+  } else {
+    split3 <- outcome_names
+  }
   
   EF <- rownames(nr_hypo)[-1]  # names of influencing factors
   nf <- length(EF)
   names(dat) <- c("response", EF)
   #no. dimensions
-  p <- ncol(dat$response)
+  p <- ncol(as.matrix(dat$response))
   fl <- NA
   for (aa in 1:nf) {
     fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
@@ -109,6 +109,11 @@ MANOVA.wide <- function(formula, data,
     nh <- sum(tmp)
   }
   
+  # MANOVA vs. MANOVAwide?
+  if(sum(grepl("cbind", formula)) == 0 && p != 1){
+    stop("For data in long format, please use function MANOVA()")
+  }
+  
   # correct formula?
   if (length(fac_names) != nf && length(fac_names) != nh){
     stop("Something is wrong with the formula. Please specify all or no interactions in crossed designs.")
@@ -121,56 +126,15 @@ MANOVA.wide <- function(formula, data,
   
   if (nf == 1) {
     # one-way layout
+    nest <- FALSE
     dat2 <- dat[order(dat[, 2]), ]
     fac.groups <- dat2[, 2]
-    Y <- split(dat2, fac.groups)
-    n <- sapply(Y, nrow)
-    Y2 <- sapply(Y, function(x) x$response)
-    hypo_matrices <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
-    
-    WTS_out <- matrix(NA, ncol = 3, nrow = 1)
-    MATS_out <- NA
-    WTPS_out <- rep(NA, 2)
-    quantiles <- matrix(NA, 2, 1)
-    rownames(WTS_out) <- fac_names
-    names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat.wide(Y2, n = n, hypo_matrices, iter = iter, alpha, resampling, 
-                                CPU, seed, p)    
-    WTS_out <- round(results$WTS, dec)
-    MATS_out <- round(results$MATS, dec)
-    WTPS_out <- round(results$WTPS, dec)
-    quantiles <- results$quantiles
-    names(quantiles) <- c("WTS_resampling", "MATS_resampling")
-    mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
-    Var_out <- results$Cov
-    descriptive <- cbind(lev_names, n, mean_out)
-    colnames(descriptive) <- c(EF, "n", split3)  
-    names(WTS_out) <- cbind ("Test statistic", "df",
-                             "p-value")
-    names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
-    colnames(MATS_out) <- "Test statistic"
-    ###
-    ## FUNKTIONIERT NICHT SO EINFACH
-    ####
-    if (univariate){
-       uniresults <- matrix(NA, ncol = p, nrow = 2)
-       for(j in 1:p){
-         Yj <- sapply(Y, function(x) as.matrix(x$response[, j]))
-       uniresults[, j] <- MANOVA.Stat.wide(Yj, n = n, 
-                                      (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)),
-                                      iter = iter, alpha, resampling, CPU, seed, p=1)$WTPS
-       
-       }
-       rownames(uniresults) <- c("WTS", "MATS")
-       colnames(uniresults) <- split3
-       }
-     
-    
+    hypo_matrices <- list((diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p))
     # end one-way layout ------------------------------------------------------
   } else {
     dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
     fac.groups <- do.call(list, dat2[, 2:(nf+1)])
-   
+  }
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
     
@@ -179,6 +143,7 @@ MANOVA.wide <- function(formula, data,
     
     if (sum(nested) > 0 || sum(nested2) > 0) {
       # nested
+      nest <- TRUE
       
       # if nested factor is named uniquely
       if (nested.levels.unique){
@@ -216,6 +181,7 @@ MANOVA.wide <- function(formula, data,
       hypo_matrices <- HN_MANOVA(fl, p)
     } else {
       # crossed
+      nest <- FALSE
       
       ## adapting formula argument, if interaction term missing
       if (nrow(perm_names) != nh) {
@@ -230,16 +196,16 @@ MANOVA.wide <- function(formula, data,
         indices <- grep(":", fac_names2, invert = T)
         hypo_matrices <- lapply(indices, function(x) hypo_matrices[[x]])
         
-      } else {
+      } else if(nf !=1){
         hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
         hypo_matrices <- hyps[[1]]
         fac_names <- hyps[[2]]
       }
     }
     
+    # correcting for "empty" combinations (if no interaction specified)
     n.groups <- prod(fl)
-    
-    if(length(Y) != n.groups){
+    if(nf != 1 & length(Y) != n.groups){
       index <- NULL
       for(i in 1:length(Y)){
         if(nrow(Y[[i]]) == 0){
@@ -247,6 +213,10 @@ MANOVA.wide <- function(formula, data,
         }
       }
       Y <- Y[-index]
+    }
+    Y2 <- lapply(Y, function(x) x$response)
+    if (p==1){
+      Y2 <- lapply(Y2, function(x) as.matrix(x))
     }
     
     
@@ -277,7 +247,7 @@ MANOVA.wide <- function(formula, data,
     colnames(quantiles) <- c("WTS_resampling", "MATS_resampling")
     # calculate results
     for (i in 1:length(hypo_matrices)) {
-      results <- MANOVA.Stat.wide(Y, n, hypo_matrices[[i]],
+      results <- MANOVA.Stat.wide(Y2, n, hypo_matrices[[i]],
                              iter, alpha, resampling, CPU, seed, p)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
@@ -294,7 +264,7 @@ MANOVA.wide <- function(formula, data,
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     colnames(MATS_out) <- "Test statistic"
-  }
+    
   # Output ------------------------------------------------------
     output$input <- input_list
     output$Descriptive <- descriptive
@@ -312,6 +282,7 @@ MANOVA.wide <- function(formula, data,
     output$BSMeans <- results$BSmeans
     output$BSVar <- results$BSVar
     output$levels <- lev_names
+    output$nested <- nest
 
 
   # check for singular covariance matrix

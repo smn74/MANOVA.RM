@@ -3,28 +3,45 @@
 %\VignetteIndexEntry{MANOVA.RM}
 -->
 
-
 ## Introduction
 
 This vignette documents the use of the `MANOVA.RM` package for the analysis of semi-parametric repeated measures designs and multivariate data. 
 The package consists of two parts - one for repeated measurements and one for multivariate data - which will be explained in detail below. Both functions calculate the Wald-type statistic 
 (WTS) as well as the ANOVA-type statistic (ATS) for repeated measures and a modification thereof (MATS) for multivariate data based on means. These test statistics can be used for arbitrary semi-parametric designs, even with unequal covariance matrices among groups
-and small sample sizes.
+and small sample sizes. For a short overview of the test statistics and corresponding references see the next section.
 Furthermore, different resampling approaches are provided in order to improve the
 small sample behavior of the test statistics. 
+The WTS requires non-singular covariance matrices. If the covariance matrix is singular, a warning is returned.
+
+For detailed explanations and examples, see also the preprint Friedrich, Konietschke and Pauly (2018) on arXiv.
+
+## Theoretical background
+
+We consider the following model
+$$
+X_{ik} = \mu_i + \varepsilon_{ik}
+$$
+for observation vectors from group $i$ and individual $k$. Here, $\mu_i$ denotes the group mean which we wish to infer and $\varepsilon_{ik}$ are the common error terms with expectation 0 and existing (co-)variances. We do not need to assume normally distributed errors for these methods and the covariances may be unequal between groups.
+Null hypotheses are formulated via contrast matrices, i.e., as $H \mu = 0$, where the rows of $H$ sum to zero.
+Then the Wald-type statistic (WTS) is a quadratic form in the estimated mean vector involving the Moore-Penrose inverse of the (transformed) empirical covariance matrix. Under the null hypothesis the WTS is asymptotically $\chi^2$ distributed with rank(H) degrees of freedom. However, this approximation is only valid for large sample sizes, see e.g. Brunner (2001). We therefore recommend to use a resampling approach as proposed by Konietschke et al.(2015) or Friedrich et al.(2017).
+
+Since the WTS requires non-singular covariance matrices, two other test statistics have been proposed: the ATS for repeated measures designs (Brunner, 2001) and the MATS for multivariate data (Friedrich and Pauly, 2018). The ATS is a scaled quadratic form in the mean vector, which is usually approximated by an F-distribution with estimated degrees of freedom. This approach is also implemented in the SAS PROC Mixed procedure. However, it is rather conservative for small sample sizes and does not provide an aysmptotic level $\alpha$ test.
+
+The MATS for multivariate data has the advantage of being invariant under scale transformations of the data, an important feature for multivariate data. Since its asymptotic distribution involves unknown parameters, we again propose to use bootstrap approaches instead (Friedrich and Pauly, 2018).
 
 ## Difference between RM and MANOVA design
 
-* In a repeated measures designs (RM) the same outcome is observed at different occasions, e.g., different time points or different parts of the body like left/right hemisphere of the brain. Hypotheses about the sub-plot or within subjects factors are possible.
+* In a repeated measures design (RM) the same outcome is observed at different occasions, e.g., different time points or different parts of the body like left/right hemisphere of the brain. Hypotheses about the sub-plot or within subjects factors are possible.
 * In a MANOVA design, d-dimensional outcome vectors are observed for every subject. These outcomes are potentially measured on different scales (e.g., kg, m, heart rate, ...) and hypotheses are formulated on the whole outcome vectors. The only difference between the functions `MANOVA` and `MANOVA.wide` is the format of the data: For `MANOVA` data need to be in long format (one row per measurement), whereas `MANOVA.wide` is for data in wide format (one row per individual).
 
+Note that a combination of both types of data, i.e., multivariate longitudinal data, can not yet be analyzed with `MANOVA.RM`.
 
 ## The `RM` function
 
-The `RM` function calculates the above mentioned test statistics in a repeated measures design with an arbitrary number of crossed whole-plot (between subjects) and 
+The `RM` function calculates the WTS and ATS in a repeated measures design with an arbitrary number of crossed whole-plot (between subjects) and 
 sub-plot (within subjects) factors.
 The resampling methods provided are a permutation procedure, a parametric bootstrap approach and a
-wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS.
+wild bootstrap using Rademacher weights. The permutation procedure provides no valid approach for the ATS and is thus not implemented.
 
 ### Data Example 1 (One whole-plot and two sub-plot factors)
 
@@ -49,14 +66,14 @@ The `RM` function takes as arguments:
 
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side. An interaction term must be specified. The time variable must be the last factor in the formula.
-* `data`: A data.frame, list or environment containing the variables in `formula`.
+* `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
 * `no.subf`: The number of sub-plot factors, default is 1.
 * `iter`: The number of iterations for the resampling approach. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.
 * `resampling`: The resampling method, one of 'Perm', 'paramBS' or 'WildBS'. Default is
 set to 'Perm'.
-* `CPU`: The number of cores used for parallel computing. If omitted, cores are detected via \code{\link[parallel]{detectCores}}.
+* `CPU`: The number of cores used for parallel computing. If omitted, cores are detected automatically.
 * `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
 * `CI.method`: The method for calculating the quantiles used for the confidence intervals, 
   either 't-quantile' (the default) or 'resampling' (based on quantile of the resampled WTS).
@@ -83,15 +100,9 @@ Due to the above mentioned issues for small sample sizes, the resampling procedu
 ### Data Example 2 (Two sub-plot and two whole-plot factors)
 
 We consider the data set `EEG` from the `MANOVA.RM` package: At the Department of Neurology, University Clinic of Salzburg, 160 patients were diagnosed
-with either AD, MCI, or SCC, based on neuropsychological diagnostics (Bathke et al.(2015)). This data set contains z-scores for 
-brain rate and Hjorth complexity,
-each measured at frontal, temporal and central electrode positions and averaged across hemispheres. In addition to standardization, complexity
-values were multiplied by -1 in order to make them more easily comparable to brain rate
-values: For brain rate we know that the values decrease with age and pathology, while
-Hjorth complexity values are known to increase with age and pathology.
-The three between-subjects factors considered were sex (men vs. women), diagnosis (AD
-vs. MCI vs. SCC), and age ($< 70$ vs. $>= 70$ years). Additionally, the within-subjects factors region (frontal, temporal, central) and 
-feature (brain rate, complexity) structure the response vector.
+with either Alzheimer's Disease (AD), mild cognitive impairments (MCI), or subjective cognitive complaints without clinically significant deficits (SCC), based on neuropsychological diagnostics (Bathke et al.(2018)). This data set contains z-scores for 
+brain rate and Hjorth complexity, each measured at frontal, temporal and central electrode positions and averaged across hemispheres. In addition to standardization, complexity values were multiplied by -1 in order to make them more easily comparable to brain rate
+values: For brain rate we know that the values decrease with age and pathology, while Hjorth complexity values are known to increase with age and pathology. The three between-subjects factors considered were sex (men vs. women), diagnosis (AD vs. MCI vs. SCC), and age ($< 70$ vs. $>= 70$ years). Additionally, the within-subjects factors region (frontal, temporal, central) and feature (brain rate, complexity) structure the response vector.
 
 ```{r}
 data(EEG)
@@ -105,7 +116,7 @@ We find significant effects at level $\alpha = 0.01$ of the whole-plot factors s
 
 ### Plotting
 
-The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals based on t-quantiles.
+The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals based on a $t$-approximation.
 The `plot` function takes an `RM` object as an argument. In addition, the factor of interest may be specified. If this argument is 
 omitted in a two- or higher-way layout, the user is asked to specify the factor for plotting. Furthermore, additional graphical parameters
 can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
@@ -122,7 +133,7 @@ plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.
 
 The `MANOVA` function calculates the WTS for multivariate data in a design with crossed or nested factors.
 Additionally, a modified ANOVA-type statistic (MATS) is calculated which has the additional advantage of being applicable to designs
-involving singular covariance matrices and is invariant under scale transformations of the data, see Friedrich and Pauly (2017) for details.
+involving singular covariance matrices and is invariant under scale transformations of the data, see Friedrich and Pauly (2018) for details.
 The resampling methods provided are a parametric bootstrap approach and a
 wild bootstrap using Rademacher weights. 
 Note that only balanced nested designs (i.e., the same number of factor levels $b$ for each level of the factor $A$) with up to three factors are 
@@ -139,10 +150,10 @@ The analysis of this example is shown below.
 The `MANOVA` function takes as arguments:
 
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
-variables of interest on the right hand side. An interaction term must be specified.
-* `data`: A data.frame, list or environment containing the variables in `formula`.
+variables of interest on the right hand side.
+* `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `iter`: The number of iterations for the resampling procedure. Default value is 10000.
+* `iter`: The number of iterations for the resampling procedure. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.
 * `resampling`: The resampling method, one of 'paramBS' and 'WildBS'. Default is
 set to 'paramBS'.
@@ -167,7 +178,7 @@ The output consists of several parts: First, some descriptive statistics of the 
 
 ### The `MANOVA.wide` function
 
-The `MANOVA.wide` function provides a wrapper for data provided in wide format, i.e., with one row per unit. Input and output are almost identical to the `MANOVA` function, except that no `subject` variable needs to be specified. The formula now consists of the matrix of outcome variables (bound together via `cbind()`) on the left hand side of the \~ operator and the factors of interest (including an interaction term) on the right.
+The `MANOVA.wide` function is used for data provided in wide format, i.e., with one row per unit. Input and output are almost identical to the `MANOVA` function, except that no `subject` variable needs to be specified. The formula now consists of the matrix of outcome variables (bound together via `cbind()`) on the left hand side of the \~ operator and the factors of interest on the right.
 For an example we use the data provided as an example for the `summary.manova()` function:
 
 ```{r}
@@ -188,15 +199,14 @@ summary(fit)
 
 ### Confidence regions
 
-The `MANOVA` function is equipped with a function for calculating and plotting of confidence regions.
-Details on the methods can be found in Friedrich and Pauly (2017). 
+A function for calculating and plotting of confidence regions is available for `MANOVA` objects. Details on the methods can be found in Friedrich and Pauly (2018). 
 
 #### Confidence regions
 
 Confidence regions can be calculated using the `conf.reg` function. Note that confidence regions can only be plotted in designs with 2 dimensions.
 The `conf.reg` function takes as arguments:
 
-* `object`: A `MANOVA` object calculated via `MANOVA()`.
+* `object`: A `MANOVA` object calculated via `MANOVA()` or `MANOVA.wide()`.
 * `nullhypo`: In designs involving more than one factor, it is necessary to specify the null hypothesis, i.e., the contrast of interest.
 
 As an example, we consider the data set `water` from the package `HSAUR`. The data set contains measurements of mortality and drinking water hardness for 61 cities in England and Wales. Suppose we want to analyse whether these measurements differ between northern and southern towns. Since the data set is in wide format, we need to use the `MANOVA.wide` function.
@@ -212,12 +222,72 @@ cr
 }
 ```
 
-The output consists of the necessary parameters specifying the ellipsoid: the center, the eigenvectors which determine the axes of the ellipsoid as well as the scaling factors for the eigenvectors, which are calculated based on the eigenvalues, the bootstrap quantile and the total sample size. For more information on the construction of the confidence ellipses see Friedrich and Pauly (2017). 
+The output consists of the necessary parameters specifying the ellipsoid: the center, the eigenvectors which determine the axes of the ellipsoid as well as the scaling factors for the eigenvectors, which are calculated based on the eigenvalues, the bootstrap quantile and the total sample size. For more information on the construction of the confidence ellipses see Friedrich and Pauly (2018). 
 For observations with two dimensions, the confidence ellipse can be plotted using the generic `plot` function. The usual plotting parameters can be used to customize the plots.
 
 ```{r}
 plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
 ```
+
+### Post-hoc comparisons
+
+#### Simultaneous confidence intervals for contrasts
+ 
+ Calculation of simultaneous confidence intervals and p-values for contrasts of the mean vector is based on the sum statistic, see Friedrich and Pauly (2018) for details. Note that the confidence intervals and p-values returned are simultaneous, i.e., they maintain the given alpha-level.
+ Confidence intervals for contrasts of the mean vector can be calculated using the function `simCI`, which takes the following arguments:
+ 
+* `object`: A `MANOVA` object calculated via `MANOVA()` or `MANOVA.wide()`.
+* `contrast`: The contrast of interest, can either be "pairwise" or "user-defined". 
+* `contmat`: For user-defined contrasts, the contrast matrix must be specified here. Note that
+its rows must sum to zero.
+* `type`: Pairwise contrasts are calculated based on the contrMat function in package multcomp, see also the corresponding help page. The type of the pairwise comparison must be specified here. 
+* `base`: an integer specifying which group is considered the baseline group for Dunnett contrasts, see also the documentation of `contrMat()` from the multcomp-package.
+
+As an example, we consider the `EEG_MANOVA` example from above:
+   
+```{r}
+# pairwise comparison using Tukey contrasts
+simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
+# the same but with Dunnett contrasts using group 2 as baseline
+simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2)
+# a one-way layout using MANOVA.wide():
+oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
+                      iter = 1000, CPU = 1)
+# and a user-defined contrast matrix
+H <- as.matrix(cbind(rep(1, 5), -1*Matrix::Diagonal(5)))
+# user-specified comparison
+simCI(oneway, contrast = "user-defined", contmat = H)
+```
+
+#### Univariate comparisons
+If the global null hypothesis is rejected, it may be of interest to infer the univariate outcomes that caused the rejection. To answer this question, one can simply calculate the univariate p-values and adjust them accordingly for multiple testing, e.g., using Bonferroni-correction.
+An example is given below. We consider a one-way layout of the EEG data with influencing factor sex and all 6 outcome variables:
+
+```{r}
+model_sex <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central, brainrate_frontal,
+                            complexity_temporal, complexity_central, complexity_frontal) ~ sex,
+                      data = EEGwide,
+                      iter = 1000, seed = 987, CPU = 1)
+summary(model_sex)
+```
+
+Since the global hypothesis is rejected at 5% level, we continue with the univariate calculations:
+```{r}
+EEG1 <- MANOVA.wide(brainrate_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG2 <- MANOVA.wide(brainrate_central ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG3 <- MANOVA.wide(brainrate_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG4 <- MANOVA.wide(complexity_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG5 <- MANOVA.wide(complexity_central ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG6 <- MANOVA.wide(complexity_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+```
+Adjust for multiple testing using the parametric bootstrap MATS and Bonferroni adjustment:
+```{r}
+p.adjust(c(EEG1$resampling[, 2], EEG2$resampling[, 2], EEG3$resampling[, 2],
+           EEG4$resampling[, 2], EEG5$resampling[, 2], EEG6$resampling[, 2]),
+         method = "bonferroni")
+```
+This reveals that the central variables (comparison 2 and 5) do not contribute to the significant difference between male and female patients.
+
 
 ### Nested Design
 To create a data example for a nested design, we use the `curdies` data set from the `GFD` package and extend it by introducing an artificial second outcome variable. In this data set, the levels of the nested factor (site) are named uniquely, i.e., levels 1-3 of factor site belong to "WINTER", whereas levels 4-6 belong to "SUMMER". Therefore, `nested.levels.unique` must be set to TRUE. The code for the analysis using both wide and long format is presented below.
@@ -231,7 +301,7 @@ set.seed(123)
 curdies$dug2 <- curdies$dugesia + rnorm(36)
 
 # first possibility: MANOVA.wide
-fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 100, nested.levels.unique = TRUE, seed = 123, CPU = 1)
+fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 1000, nested.levels.unique = TRUE, seed = 123, CPU = 1)
 
 # second possibility: MANOVA (long format)
 dug <- c(curdies$dugesia, curdies$dug2)
@@ -239,7 +309,8 @@ season <- rep(curdies$season, 2)
 site <- rep(curdies$site, 2)
 curd <- data.frame(dug, season, site, subject = rep(1:36, 2))
 
-fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nested.levels.unique = TRUE, seed = 123, iter = 100, CPU = 1)
+fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nested.levels.unique = TRUE, seed = 123, iter = 1000,
+               CPU = 1)
 
 # comparison of results
 summary(fit1)
@@ -273,16 +344,22 @@ parameters.
 
 ## References
 
-* Bathke, A. et al. (2016).
-  Using EEG, SPECT, and Multivariate Resampling Methods
-  to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+* Bathke, A. et al. (2018).
+  Testing Mean Differences among Groups: Multivariate and Repeated Measures Analysis with Minimal Assumptions.
+  Multivariate Behavioral Research, 53(3), 348-359, DOI: 10.1080/00273171.2018.1446320.
       
+* Brunner, E. (2001). Asymptotic and approximate analysis of repeated measures designs under heteroscedasticity. 
+  Mathematical Statistics with Applications in Biometry.
+
 * Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
   in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
  
-* Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
-  heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
- 
+* Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and heteroscedastic MANOVA. 
+  Journal of Multivariate Analysis, 165, 166-179, DOI: 10.1016/j.jmva.2017.12.008.
+
+* Friedrich, S., Konietschke, F., and Pauly, M. (2018). Analysis of Multivariate Data and Repeated Measures Designs with the
+R Package MANOVA.RM. arXiv preprint arXiv:1801.08002.
+
 * Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
   of Multivariate Analysis, 140, 291-301.  

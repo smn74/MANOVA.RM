@@ -94,7 +94,7 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
   
   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359, 
   Doi: 10.1080/00273171.2018.1446320.
   
   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
