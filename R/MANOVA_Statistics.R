@@ -97,7 +97,8 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
      # MATS
      DP <- diag(SnP)*diag(p*n.groups)
      Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
-     return(list(WTPS, Q_N_P, meansP, DP))
+     wbs <- list(WTPS = WTPS, Q_N_P = Q_N_P, meansP = meansP, DP = DP)
+     return(wbs)
    }
   
   cl <- makeCluster(CPU)
