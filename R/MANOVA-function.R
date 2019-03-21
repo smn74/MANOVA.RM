@@ -179,6 +179,7 @@ MANOVA <- function(formula, data, subject,
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     # end one-way layout ------------------------------------------------------
   } else {
@@ -314,6 +315,7 @@ MANOVA <- function(formula, data, subject,
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     
   }

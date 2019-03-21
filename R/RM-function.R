@@ -304,6 +304,7 @@ RM <- function(formula, data, subject,
     output$Covariance <- Var_out
     output$WTS <- WTS_out
     output$ATS <- ATS_out
+    WTPS_out[WTPS_out == 0] <- "<0.001"
     output$resampling <- WTPS_out
     output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper,
                             fac_names_original, dat2, fl, alpha, nadat2, lev_names)

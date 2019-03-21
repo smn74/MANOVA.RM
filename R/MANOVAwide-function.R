@@ -263,6 +263,7 @@ MANOVA.wide <- function(formula, data,
     rownames(descriptive) <- NULL
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     
   # Output ------------------------------------------------------
