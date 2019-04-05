@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.3.1
-Date: 2018-08-13
+Version: 0.3.2
+Date: 2019-04-05
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@alumni.uni-ulm.de>
 Depends:
@@ -33,7 +33,7 @@ Suggests:
     tidyr,
     GFD,
     testthat
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr, rmarkdown
 URL: http://github.com/smn74/MANOVA.RM
 BugReports: http://github.com/smn74/MANOVA.RM/issues
