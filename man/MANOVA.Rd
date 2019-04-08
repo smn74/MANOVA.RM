@@ -71,7 +71,7 @@ The MANOVA() function provides the Wald-type statistic (WTS) as well as
   p-values, the function also provides p-values based on resampling approaches.
 }
 \section{NOTE}{
- The number of resampling iterations has been set to 100 in the examples due to run time 
+ The number of resampling iterations has been set to 10 in the examples due to run time 
 restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
 For more information and detailed examples also refer to the package vignette.
 }
@@ -80,7 +80,7 @@ For more information and detailed examples also refer to the package vignette.
 data(EEG)
 EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
                     data = EEG, subject = "id", resampling = "paramBS", 
-                    alpha = 0.05, iter = 100, CPU = 1)
+                    alpha = 0.05, iter = 10, CPU = 1)
 summary(EEG_mod)
 
 }

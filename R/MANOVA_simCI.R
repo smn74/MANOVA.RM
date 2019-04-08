@@ -100,7 +100,7 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
     return(result)
   }
   
-  scis <- t(apply(contmat.summary, 1, sci))
+  scis <- t(apply(contmat, 1, sci))
   if (contrast == "pairwise"){
     rownames(scis) <- rownames(M)
   }

@@ -85,16 +85,22 @@ plot.RM <- function (x, CI.info = FALSE, ...) {
 print.MANOVA <- function(x, ...) {
   object <- x
   a <- object$input
+  # avoid printing zeros
+  WTS <- object$WTS
+  WTS[WTS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  res <- object$resampling
+  res[res == 0] <- "<0.001"
+  
   cat("Call:", "\n")
   print(a$formula)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(object$WTS)
+  print(WTS)
   # cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   #  print(x$ATS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
   print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(object$resampling)
+  print(res)
 }
 
 
@@ -109,16 +115,22 @@ print.MANOVA <- function(x, ...) {
 #' @export
 summary.MANOVA <- function (object, ...) {
   a <- object$input
+  # avoid printing zeros
+  WTS <- object$WTS
+  WTS[WTS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  res <- object$resampling
+  res[res == 0] <- "<0.001"
+  
   cat("Call:", "\n")
   print(a$formula)
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(object$WTS)
+  print(WTS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
   print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(object$resampling)
+  print(res)
 }
 
 #' Display an RM object
@@ -132,17 +144,25 @@ summary.MANOVA <- function (object, ...) {
 print.RM <- function(x, ...) {
   object <- x
   a <- object$input
+  # avoid printing zeros
+  WTS <- object$WTS
+  ATS <- object$ATS
+  WTS[WTS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  ATS[ATS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  res <- object$resampling
+  res[res == 0] <- "<0.001"
+  
   cat("Call:", "\n")
   print(a$formula)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(object$WTS)
+  print(WTS)
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  print(object$ATS)
+  print(ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   if(x$input$resampling == "Perm"){
-    print(object$resampling[, 1, drop = FALSE])
+    print(res[, 1, drop = FALSE])
   } else {
-    print(object$resampling)
+    print(res)
   }
 }
 
@@ -157,19 +177,29 @@ print.RM <- function(x, ...) {
 #' @export
 summary.RM <- function (object, ...) {
   a <- object$input
+  b <- object$plotting
+  # avoid printing zeros
+  WTS <- object$WTS
+  ATS <- object$ATS
+  WTS[WTS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  ATS[ATS[, "p-value"] == 0, "p-value"] <- "<0.001"
+  res <- object$resampling
+  res[res == 0] <- "<0.001"
+  
   cat("Call:", "\n")
   print(a$formula)
+  cat("A repeated measures analysis with ", b$no.subf, "within-subject and ", b$nf-b$no.subf, "between-subject factors.", "\n")
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(object$WTS)
+  print(WTS)
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  print(object$ATS)
+  print(ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   if(a$resampling == "Perm"){
-    print(object$resampling[, 1, drop = FALSE])
+    print(res[, 1, drop = FALSE])
   } else {
-    print(object$resampling)
+    print(res)
   }
 }
 

@@ -231,10 +231,11 @@ plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference i
 
 ### Post-hoc comparisons
 
-#### Simultaneous confidence intervals for contrasts
+#### Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts
  
- Calculation of simultaneous confidence intervals and p-values for contrasts of the mean vector is based on the sum statistic, see Friedrich and Pauly (2018) for details. Note that the confidence intervals and p-values returned are simultaneous, i.e., they maintain the given alpha-level.
- Confidence intervals for contrasts of the mean vector can be calculated using the function `simCI`, which takes the following arguments:
+ Calculation of simultaneous confidence intervals and multivariate p-values for contrasts of the mean vector is based on the sum statistic, see Friedrich and Pauly (2018) for details. Note that the confidence intervals and p-values returned are simultaneous, i.e., they maintain the given alpha-level.
+ Confidence intervals are calculated based on summary effects, i.e., averaging over all dimensions, whereas the returned p-values are multivariate.
+ The function `simCI` takes the following arguments:
  
 * `object`: A `MANOVA` object calculated via `MANOVA()` or `MANOVA.wide()`.
 * `contrast`: The contrast of interest, can either be "pairwise" or "user-defined". 

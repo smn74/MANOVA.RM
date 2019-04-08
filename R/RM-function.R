@@ -31,10 +31,14 @@
 #'  statistic as well as the ANOVA-type statistic for repeated measures designs
 #'  with metric data as described in Friedrich et al. (2017).
 #'  These are even applicable for non-normal error terms and/or heteroscedastic
-#'  variances. It is implemented for designs with an arbitrary number of whole-plot 
-#'  and sub-plot factors and allows for different sample sizes. In addition to the
+#'  variances. It is implemented for designs with an arbitrary number of 
+#'  between-subject (whole-plot) and within-subject (sub-plot) factors and 
+#'  allows for different sample sizes. In addition to the
 #'  asymptotic p-values, it also provides p-values based on resampling
 #'  approaches.
+#'  NOTE: The number of within-subject factors needs to be specified in the
+#'  function call. If only one factor is present, it is assumed that this is a
+#'  within-subjects factor (e.g. time).
 #'   
 #' @return An \code{RM} object containing the following components:
 #' \item{Descriptive}{Some descriptive statistics of the data for all factor
@@ -304,7 +308,6 @@ RM <- function(formula, data, subject,
     output$Covariance <- Var_out
     output$WTS <- WTS_out
     output$ATS <- ATS_out
-    WTPS_out[WTPS_out == 0] <- "<0.001"
     output$resampling <- WTPS_out
     output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper,
                             fac_names_original, dat2, fl, alpha, nadat2, lev_names)

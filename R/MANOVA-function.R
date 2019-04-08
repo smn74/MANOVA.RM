@@ -38,7 +38,7 @@
 #'   crossed factors or for nested designs. In addition to the asymptotic
 #'   p-values, the function also provides p-values based on resampling approaches.
 #'  
-#' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
+#' @section NOTE: The number of resampling iterations has been set to 10 in the examples due to run time 
 #' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
 #' For more information and detailed examples also refer to the package vignette.
 #'     
@@ -56,7 +56,7 @@
 #' @examples data(EEG)
 #' EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
 #'                     data = EEG, subject = "id", resampling = "paramBS", 
-#'                     alpha = 0.05, iter = 100, CPU = 1)
+#'                     alpha = 0.05, iter = 10, CPU = 1)
 #' summary(EEG_mod)
 #' 
 #' @seealso \code{\link{RM}}
@@ -179,7 +179,7 @@ MANOVA <- function(formula, data, subject,
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
-    WTPS_out[WTPS_out == 0] <- "<0.001"
+    #WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     # end one-way layout ------------------------------------------------------
   } else {
@@ -315,7 +315,7 @@ MANOVA <- function(formula, data, subject,
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
-    WTPS_out[WTPS_out == 0] <- "<0.001"
+   # WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     
   }
