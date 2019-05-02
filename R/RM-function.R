@@ -95,6 +95,7 @@
 #' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
 #' @importFrom parallel makeCluster parSapply detectCores
+#' @importFrom data.table as.data.table
 #' 
 #' @export
 
@@ -133,7 +134,16 @@ RM <- function(formula, data, subject,
     stop("There are missing values in the data.")
   }
   
+  
   dat2 <- data.frame(dat, subject = subject)
+  # check for missing values
+  dt <- as.data.table(dat2)
+  N <- NULL
+  .N <- NULL
+  if(NROW(dt[, .N, by = subject][unique(N)])!=1){
+   stop("There are missing values in the data.")
+  }
+  
   nf <- ncol(dat) - 1
   nadat <- names(dat)
   nadat2 <- nadat[-1]

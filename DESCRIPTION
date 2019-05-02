@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.3.2
-Date: 2019-04-08
+Version: 0.3.3
+Date: 2019-05-02
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@alumni.uni-ulm.de>
 Depends:
@@ -23,7 +23,8 @@ Imports:
     parallel,
     methods,
     ellipse,
-    multcomp
+    multcomp,
+    data.table
 LazyData: TRUE
 Suggests:
     RGtk2 (>= 2.20.31),
