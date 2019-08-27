@@ -22,6 +22,11 @@ Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. a
   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
   Doi: 10.1080/00273171.2018.1446320.
+  
+  
+  @examples 
+  library("ggplot2")
+  qplot(data = EEGwide, diagnosis)
 }
 \usage{
 data(EEGwide)
@@ -36,5 +41,9 @@ Hjorth complexity values are known to increase with age and pathology.
 The three between-subjects factors considered were sex (men vs. women), diagnosis (AD
 vs. MCI vs. SCC), and age (\eqn{< 70} vs. \eqn{>= 70} years). Additionally, the within-subjects factors region (frontal, temporal, central) and 
 feature (brain rate, complexity) structure the response vector.
+}
+\details{
+Note that this data set contains exactly the same data as the data set 'EEG', only the format is different. The 
+transformation between the different formats can be achieved using, e.g., the \code{tidyverse} package.
 }
 \keyword{datasets}

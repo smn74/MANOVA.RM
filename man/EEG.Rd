@@ -34,4 +34,10 @@ The three between-subjects factors considered were sex (men vs. women), diagnosi
 vs. MCI vs. SCC), and age (\eqn{< 70} vs. \eqn{>= 70} years). Additionally, the within-subjects factors region (frontal, temporal, central) and 
 feature (brain rate, complexity) structure the response vector.
 }
+\examples{
+  library(tidyverse)
+  ggplot(EEG, aes(x=sex, y=resp)) + geom_point(alpha=0.5) + facet_grid(region+feature~diagnosis) +
+     stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red")
+  
+}
 \keyword{datasets}

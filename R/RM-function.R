@@ -10,7 +10,9 @@
 #'   must be the last factor in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
-#' @param subject The column name of the subjects in the data.
+#' @param subject The column name of the subjects in the data. NOTE: Subjects within 
+#' different groups of whole-plot factors must have individual labels, see Details for 
+#' more explanation.
 #' @param no.subf The number of sub-plot factors in the data, default is 1.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
@@ -39,6 +41,14 @@
 #'  NOTE: The number of within-subject factors needs to be specified in the
 #'  function call. If only one factor is present, it is assumed that this is a
 #'  within-subjects factor (e.g. time).
+#'  
+#'  If subjects in different groups of the whole-plot factor have the same id, they will 
+#'  not be identified as different subjects and thus it is erroneously assumed that their 
+#'  measurements belong to one subject. Example: Consider a study with one whole-plot factor 
+#'  "treatment" with leels verum and placebo aand one sub-plot factor "time" (4 measurements).
+#'  If subjects in the placebo group are labelled 1-20 and subjects in the verum group have 
+#'  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
+#'  40 individuals with 4 measurements each.
 #'   
 #' @return An \code{RM} object containing the following components:
 #' \item{Descriptive}{Some descriptive statistics of the data for all factor
@@ -156,6 +166,14 @@ RM <- function(formula, data, subject,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  
+  # check that subjects are correctly labelled (at least for 1 sub-plot) factor
+  if(no.subf == 1){
+    if(nrow(data)/length(unique(subject)) != fl[length(fl)]){
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
+    }
+  }
+
   if (nf == 1) {
     # one-way layout
     dat2 <- dat2[order(dat2[, 2]), ]

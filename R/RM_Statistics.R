@@ -35,14 +35,15 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   
   # ATS
   C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
-  D <- diag(C) * diag(ncol(C))
   spur <- sum(diag(C %*% Sn))
-  Lambda <- diag(1 / (n - 1))
   ATS <- N / spur * t(means) %*% C %*% means
   df_ATS <- spur ^ 2 / sum(diag(C %*% Sn %*% C %*% Sn))
-  if (iii <= hypo_counter){
-    df_ATS2 <- spur ^ 2 / sum(diag(D %*% D %*% Sn %*% Sn %*% Lambda))
-  } else {
+   if (iii <= hypo_counter){
+     # second df for independent factors
+     Lambda <- diag(1 / (n - 1))
+     D <- diag(C) * diag(ncol(C))
+     df_ATS2 <- sum(diag(D %*% Sn)) ^ 2 / sum(diag(D %*% D %*% Sn %*% Sn %*% Lambda))
+   } else {
     df_ATS2 <- Inf
   }
   

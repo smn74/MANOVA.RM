@@ -23,4 +23,10 @@ data(o2cons)
 \description{
 A dataset containing measurements on the oxygen consumption of leukocytes in the presence and absence of inactivated staphylococci.
 }
+\examples{
+  library(tidyverse)
+  ggplot(o2cons, aes(x=Group, y=O2)) + geom_point(alpha=0.5) + facet_grid(Staphylococci~Time) +
+  stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red") 
+
+}
 \keyword{datasets}

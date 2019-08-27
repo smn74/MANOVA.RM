@@ -16,6 +16,12 @@
 #' @source Friedrich, S., Brunner, E. & Pauly, M. (2017). 
 #' Permuting longitudinal data in spite of the dependencies. 
 #' Journal of Multivariate Analysis, 153, 255-265.
+#' 
+#' @examples 
+#'   library(tidyverse)
+#'   ggplot(o2cons, aes(x=Group, y=O2)) + geom_point(alpha=0.5) + facet_grid(Staphylococci~Time) +
+#'   stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red") 
+#' 
 "o2cons"
 
 #' EEG Measurements in Patients with Alzheimer's Disease (long format)
@@ -48,6 +54,11 @@
 #'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
 #'   Doi: 10.1080/00273171.2018.1446320.
 #'   
+#' @examples 
+#'   library(tidyverse)
+#'   ggplot(EEG, aes(x=sex, y=resp)) + geom_point(alpha=0.5) + facet_grid(region+feature~diagnosis) +
+#'      stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red")
+#'   
 "EEG"
 
 
@@ -62,6 +73,9 @@
 #' The three between-subjects factors considered were sex (men vs. women), diagnosis (AD
 #' vs. MCI vs. SCC), and age (\eqn{< 70} vs. \eqn{>= 70} years). Additionally, the within-subjects factors region (frontal, temporal, central) and 
 #' feature (brain rate, complexity) structure the response vector.
+#'
+#'@details Note that this data set contains exactly the same data as the data set 'EEG', only the format is different. The 
+#'transformation between the different formats can be achieved using, e.g., the \code{tidyverse} package.
 #'
 #' @format A data frame with 160 rows and 9 variables:
 #' \describe{
@@ -83,5 +97,10 @@
 #'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
 #'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
 #'   Doi: 10.1080/00273171.2018.1446320.
+#'   
+#'   
+#'   @examples 
+#'   library("ggplot2")
+#'   qplot(data = EEGwide, diagnosis)
 #'   
 "EEGwide"

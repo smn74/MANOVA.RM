@@ -122,7 +122,7 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
       "\n", "-", "Confidence level:", (1 - alpha) * 100, "%", 
       "\n") 
   
-  cat("\n", "#------Multivariate post-hoc comparisons -----#", 
+  cat("\n", "#------Multivariate post-hoc comparisons: p-values -----#", 
   "\n", "\n") 
   print(p_val)
   
