@@ -7,7 +7,7 @@
 #' @param type If contrast is "pairwise", the type of the pairwise comparison must be specified here. 
 #' Calculation is based on the contrMat function in package multcomp, see the corresponding help page 
 #' for details on the types of contrasts available.
-#' @param base an interger specifying which group is considered the baseline group 
+#' @param base An integer specifying which group is considered the baseline group 
 #' for Dunnett contrasts, see \code{\link[multcomp]{contrMat}}.
 #' @param ... Not used yet.
 #'   
@@ -26,7 +26,7 @@
 #' @importFrom multcomp contrMat
 #'
 #' @export
-simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NULL, type = NULL,
+simCI <- function(object, contrast, contmat = NULL, type = NULL,
                   base = 1, ...){
   
   if(object$nested){
@@ -51,8 +51,13 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
     if(is.null(contmat)){
       stop("Please specify a contrast matrix.")
     }
+    # simple contrast vector
+    if(is.null(dim(contmat))){
+      contmat <- t(as.matrix(contmat))
+    } else {
     if(sum(rowSums(contmat) > 1e-15) != 0){
       stop("The rows of the contrast matrix must sum to zero!")
+    }
     }
     if (ncol(contmat) != p*prod(fl)){
       stop(paste("The contrast matrix must have", prod(fl)*p, "columns."))
@@ -68,7 +73,7 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
     if(nf == 1){
       names(n) <- lev[, 1]
     } else {
-      names(n) <- sort(do.call(paste, c(lev, sep = " ")))
+      names(n) <- do.call(paste, c(lev, sep = " "))
     }
       M <- contrMat(n, type = type, base)
       contmat <- M %x% t(rep(1, p))
@@ -115,6 +120,9 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
   if (contrast == "pairwise"){
     p_val<- data.frame("contrast" = rownames(M), "p-value" = p_val)
   }
+  
+  # avoid printing zeros
+  # p_val[p_val[, "p.value"] == 0, "p.value"] <- "<0.001"
   
   
   cat("\n", "#------ Call -----#", 

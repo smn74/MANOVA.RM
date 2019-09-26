@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Resampling-Based Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.3.4
-Date: 2019-08-27
+Version: 0.4.1
+Date: 2019-10-18
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@med.uni-goettingen.de>
 Depends:

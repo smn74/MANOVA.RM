@@ -7,7 +7,7 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side 
 #'   contains the response variable and the right hand side contains the factor 
-#'   variables of interest. An interaction term must be specified.
+#'   variables of interest.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data.

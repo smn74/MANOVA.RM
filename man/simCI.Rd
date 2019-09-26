@@ -4,8 +4,7 @@
 \alias{simCI}
 \title{Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts in multivariate factorial designs}
 \usage{
-simCI(object, contrast = c("pairwise", "user-defined"), contmat = NULL,
-  type = NULL, base = 1, ...)
+simCI(object, contrast, contmat = NULL, type = NULL, base = 1, ...)
 }
 \arguments{
 \item{object}{A \code{MANOVA} object.}
@@ -19,7 +18,7 @@ its rows must sum to zero.}
 Calculation is based on the contrMat function in package multcomp, see the corresponding help page 
 for details on the types of contrasts available.}
 
-\item{base}{an interger specifying which group is considered the baseline group 
+\item{base}{An integer specifying which group is considered the baseline group 
 for Dunnett contrasts, see \code{\link[multcomp]{contrMat}}.}
 
 \item{...}{Not used yet.}

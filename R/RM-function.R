@@ -45,8 +45,8 @@
 #'  If subjects in different groups of the whole-plot factor have the same id, they will 
 #'  not be identified as different subjects and thus it is erroneously assumed that their 
 #'  measurements belong to one subject. Example: Consider a study with one whole-plot factor 
-#'  "treatment" with leels verum and placebo aand one sub-plot factor "time" (4 measurements).
-#'  If subjects in the placebo group are labelled 1-20 and subjects in the verum group have 
+#'  "treatment" with levels verum and placebo and one sub-plot factor "time" (4 measurements).
+#'  If subjects in the placebo group are labeled 1-20 and subjects in the verum group have 
 #'  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
 #'  40 individuals with 4 measurements each.
 #'   
@@ -167,10 +167,11 @@ RM <- function(formula, data, subject,
   }
   lev_names <- expand.grid(levels)
   
-  # check that subjects are correctly labelled (at least for 1 sub-plot) factor
+  # check that subjects are correctly labeled (at least for 1 sub-plot) factor
   if(no.subf == 1){
     if(nrow(data)/length(unique(subject)) != fl[length(fl)]){
-      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points
+                  (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
     }
   }
 
@@ -186,15 +187,15 @@ RM <- function(formula, data, subject,
     hypo <- diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
     ATS_out <- matrix(NA, ncol = 4, nrow = 1)
-    WTPS_out <- rep(NA, 2)
+    WTPS_out <- matrix(NA, ncol= 2, nrow = 1)
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
-    names(WTPS_out) <- fac_names
+    rownames(WTPS_out) <- fac_names
     results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, 
                               alpha, resampling, seed, CI.method)
-    WTS_out <- round(results$WTS, dec)
-    ATS_out <- round(results$ATS, dec)
-    WTPS_out <- round(results$WTPS, dec)
+    WTS_out[1,] <- round(results$WTS, dec)
+    ATS_out[1, ] <- round(results$ATS, dec)
+    WTPS_out[1, ] <- round(results$WTPS, dec)
     mean_out <- round(results$Mean, dec)
     Var_out <- round(results$Cov, dec)
     CI <- round(results$CI, dec)
@@ -204,10 +205,10 @@ RM <- function(formula, data, subject,
                                paste("Lower", 100 * (1 - alpha), "%", "CI"),
                                paste("Upper", 100 * (1 - alpha), "%", "CI"))
     
-    names(WTS_out) <- cbind ("Test statistic", "df",
+    colnames(WTS_out) <- cbind ("Test statistic", "df",
                                 "p-value")
-    names(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
-    names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
+    colnames(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
+    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive

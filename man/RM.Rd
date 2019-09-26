@@ -80,8 +80,8 @@ The RM() function provides the Wald-type
  If subjects in different groups of the whole-plot factor have the same id, they will 
  not be identified as different subjects and thus it is erroneously assumed that their 
  measurements belong to one subject. Example: Consider a study with one whole-plot factor 
- "treatment" with leels verum and placebo aand one sub-plot factor "time" (4 measurements).
- If subjects in the placebo group are labelled 1-20 and subjects in the verum group have 
+ "treatment" with levels verum and placebo and one sub-plot factor "time" (4 measurements).
+ If subjects in the placebo group are labeled 1-20 and subjects in the verum group have 
  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
  40 individuals with 4 measurements each.
 }

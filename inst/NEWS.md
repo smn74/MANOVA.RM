@@ -1,3 +1,12 @@
+# MANOVA.RM 0.4.1
+* new function multRM for multivariate repeated measures designs
+
+# MANOVA.RM 0.3.4
+* include warning for incorrectly labelled subjects (in RM designs with more than one whole-plot factor)
+* include graphics for example documentation
+* update package description
+* implement checks for missing values in RM
+
 # MANOVA.RM 0.3.1
 * implementation of post-hoc comparisons
 * formula without interaction term possible (in MANOVA)
