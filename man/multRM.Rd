@@ -76,7 +76,8 @@ The multRM() function provides the Wald-type
 data(EEG)
 library(tidyverse)
 eeg <- spread(EEG, feature, resp)
-fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 200)
+fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, 
+              subject = "id", within = "region", iter = 200)
 summary(fit)
 }
 

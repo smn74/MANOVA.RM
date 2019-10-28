@@ -15,8 +15,10 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   
   V <- lapply(Y, cov)
   sigma_hat <- 1/nind[1]*V[[1]]
-  for (i in 2:a){
-    sigma_hat <- magic::adiag(sigma_hat, 1/nind[i]*V[[i]])
+  if(a != 1){
+    for (i in 2:a){
+      sigma_hat <- magic::adiag(sigma_hat, 1/nind[i]*V[[i]])
+    }
   }
   Sn <- N * sigma_hat
   
@@ -28,7 +30,6 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   # MATS
   D <- diag(Sn)*diag(p*a*t)
   Q_N <- N* t(means)%*%t(H)%*%MASS::ginv(H%*%D%*%t(H))%*%H%*%means
-  
   ### bootstrap functions
   
   #--------------------------------- parametric bootstrap ---------------------------#
@@ -45,8 +46,10 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
     VP <- lapply(XP, cov)
     
     sigma_hatP <- 1/nind[1]*VP[[1]]
-    for (i in 2:a){
-      sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
+    if (a != 1){
+      for (i in 2:a){
+        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
+      }
     }
     SnP <- N * sigma_hatP
     
@@ -77,8 +80,10 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
     meansP <- unlist(meansP)
     
     sigma_hatP <- VP[[1]]
-    for (i in 2:a){
-      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    if (a != 1){
+      for (i in 2:a){
+        sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+      }
     }
     SnP <- N * sigma_hatP
     
@@ -95,7 +100,6 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   
   
   cl <- makeCluster(CPU)
-  
   if(seed != 0){
     parallel::clusterSetRNGStream(cl, iseed = seed)
   }
@@ -104,7 +108,7 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   } else if(resampling == "WildBS"){
     bs_out <- parallel::parLapply(cl, 1:iter, WBS)
   }
-  
+ 
   WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
   MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
   ecdf_WTPS <- ecdf(WTPS)
