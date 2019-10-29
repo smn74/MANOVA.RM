@@ -188,7 +188,11 @@ multRM <- function(formula, data, subject, within,
     dat2 <- dat2[order(dat2[, "subject"]), ]
     fac.groups <- do.call(list, dat2[, 2:(nf+1)])
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
-    Y<- split(dat2, dat2[, whole])#, lex.order = TRUE)
+    if(length(whole) ==0){
+      Y <- list(dat2)
+    } else {
+       Y<- split(dat2, dat2[, whole])#, lex.order = TRUE)
+    }
   }
   nind <- sapply(Y, nrow)/lev.sub
   

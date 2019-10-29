@@ -17,26 +17,26 @@ Description: Implemented are various tests for semi-parametric repeated measures
     Friedrich, S., Konietschke, F. and Pauly, M. (2018) <arXiv:1801.08002>.
 License: GPL-2 | GPL-3
 Imports:
-    plyr (>= 1.8.3),
-    MASS (>= 7.3-43),
-    Matrix (>= 1.2-2),
-    magic (>= 1.5-6),
+    plyr (>= 1.8.4),
+    MASS (>= 7.3-51),
+    Matrix (>= 1.2-17),
+    magic (>= 1.5-9),
     plotrix (>= 3.5-12),
     parallel,
     methods,
     ellipse,
     multcomp,
-    data.table
+    data.table (>= 1.12.6)
 LazyData: TRUE
 Suggests:
     RGtk2 (>= 2.20.31),
     knitr,
     rmarkdown,
     HSAUR,
-    tidyr,
+    tidyr(>= 1.0.0),
     GFD,
     testthat,
-    tidyverse
+    tidyverse (>= 1.2.1)
 Encoding: UTF-8
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr, rmarkdown
