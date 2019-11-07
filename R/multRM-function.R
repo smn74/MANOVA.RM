@@ -263,7 +263,7 @@ multRM <- function(formula, data, subject, within,
   }
   mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
   Var_out <- results$Cov
-  descriptive <- cbind(lev_names, nind, mean_out)
+  descriptive <- cbind(unique(lev_names), nind, mean_out)
   colnames(descriptive) <- c(EF, "n", split3)
   rownames(descriptive) <- NULL
   colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
