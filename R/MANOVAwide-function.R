@@ -258,7 +258,7 @@ MANOVA.wide <- function(formula, data,
     time <- results$time
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    descriptive <- cbind(unique(lev_names), n, mean_out)
+    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:nf]), ], n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)
     rownames(descriptive) <- NULL
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")

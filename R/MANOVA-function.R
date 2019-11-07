@@ -167,16 +167,16 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
-    WTS_out <- round(results$WTS, dec)
+    WTS_out[1, ] <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
     quantiles <- results$quantiles
     names(quantiles) <- c("WTS_resampling", "MATS_resampling")
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    descriptive <- cbind(lev_names, n, mean_out)
+    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:(nf)]), ], n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
-    names(WTS_out) <- cbind ("Test statistic", "df",
+    colnames(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     #WTPS_out[WTPS_out == 0] <- "<0.001"

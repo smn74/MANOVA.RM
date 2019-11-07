@@ -200,7 +200,7 @@ RM <- function(formula, data, subject,
     Var_out <- round(results$Cov, dec)
     CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
-    descriptive <- cbind(lev_names, n, mean_out, CI)
+    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:(nf)]), ], n, mean_out, CI)
     colnames(descriptive) <- c(nadat2, "n", "Means",
                                paste("Lower", 100 * (1 - alpha), "%", "CI"),
                                paste("Upper", 100 * (1 - alpha), "%", "CI"))
