@@ -1,5 +1,8 @@
 # MANOVA.RM 0.4.1
-* new function multRM for multivariate repeated measures designs
+* include new function multRM for multivariate repeated measures designs
+* update documentation and vignette
+* update output of RM (now also states the names of the within-subject factors)
+* improve post-hoc comparisons
 
 # MANOVA.RM 0.3.4
 * include warning for incorrectly labelled subjects (in RM designs with more than one whole-plot factor)

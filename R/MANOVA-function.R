@@ -103,10 +103,6 @@ MANOVA <- function(formula, data, subject,
     stop("For data in wide format, please use function MANOVA.wide()")
   }
   
-  input_list <- list(formula = formula, data = data,
-                     subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling)
-  
   test1 <- hasArg(CPU)
   if(!test1){
     CPU <- parallel::detectCores()
@@ -116,6 +112,10 @@ MANOVA <- function(formula, data, subject,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     subject = subject, 
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -174,10 +174,10 @@ MANOVA <- function(formula, data, subject,
     names(quantiles) <- c("WTS_resampling", "MATS_resampling")
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:(nf)]), ], n, mean_out)
+    descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
     colnames(WTS_out) <- cbind ("Test statistic", "df",
-                             "p-value")
+                                "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     #WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
@@ -264,7 +264,7 @@ MANOVA <- function(formula, data, subject,
         hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
         hypo_matrices <- hyps[[1]]
         fac_names <- hyps[[2]]
-    }
+      }
     }
     # ---------------------- error detection ------------------------------------
     
@@ -315,31 +315,31 @@ MANOVA <- function(formula, data, subject,
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
-   # WTPS_out[WTPS_out == 0] <- "<0.001"
+    # WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     
   }
   # Output ------------------------------------------------------
-    output <- list()
-    output$time <- time
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$Means <- mean_out
-    output$MATS <- MATS_out
-    output$WTS <- WTS_out
-    output$resampling <- WTPS_out
-    output$quantile <- quantiles
-    output$nf <- nf
-    output$H <- hypo_matrices
-    output$factors <- fac_names
-    output$p <- p
-    output$fl <- fl
-    output$BSMeans <- results$BSmeans
-    output$BSVar <- results$BSVar
-    output$levels <- lev_names
-    output$nested <- nest
-  
+  output <- list()
+  output$time <- time
+  output$input <- input_list
+  output$Descriptive <- descriptive
+  output$Covariance <- Var_out
+  output$Means <- mean_out
+  output$MATS <- MATS_out
+  output$WTS <- WTS_out
+  output$resampling <- WTPS_out
+  output$quantile <- quantiles
+  output$nf <- nf
+  output$H <- hypo_matrices
+  output$factors <- fac_names
+  output$p <- p
+  output$fl <- fl
+  output$BSMeans <- results$BSmeans
+  output$BSVar <- results$BSVar
+  output$levels <- lev_names
+  output$nested <- nest
+  output$modelcall <- MANOVA
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

@@ -10,9 +10,9 @@
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data. NOTE: Subjects within 
-#' different groups of whole-plot factors must have individual labels, see Details for 
+#' different groups of between-subject factors must have individual labels, see Details for 
 #' more explanation.
-#' @param within Specifies the within-subjects factor(s) in the formula.
+#' @param within Specifies the within-subject factor(s) in the formula.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -36,7 +36,7 @@
 #'  NOTE: The within-subject factors need to be specified in the
 #'  function call (\code{within =}).
 #'  
-#'  If subjects in different groups of the whole-plot factor have the same id, they will 
+#'  If subjects in different groups of the between-subject factor have the same id, they will 
 #'  not be identified as different subjects and thus it is erroneously assumed that their 
 #'  measurements belong to one subject. See \code{\link{RM}} for more explanations and an example.
 #'   
@@ -54,7 +54,7 @@
 #' @examples
 #' \dontrun{
 #' data(EEG)
-#' library(tidyverse)
+#' library(tidyr)
 #' eeg <- spread(EEG, feature, resp)
 #' fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, 
 #'               subject = "id", within = "region", iter = 200)
@@ -96,8 +96,6 @@ multRM <- function(formula, data, subject, within,
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
   
-  input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling)
   output <- list()
   
   test1 <- hasArg(CPU)
@@ -109,6 +107,9 @@ multRM <- function(formula, data, subject, within,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -291,6 +292,7 @@ multRM <- function(formula, data, subject, within,
   #output$nested <- nest
   output$other <- list(no.subf = no.subf, no.whole = no.whole, p = p, within = within)
   output$nested <- FALSE
+  output$modelcall <- multRM
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

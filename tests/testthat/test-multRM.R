@@ -1,4 +1,4 @@
-context("multRM")
+#context("multRM")
 
 test_that("multRM with one dimension equals RM", {
   t1 <- multRM(resp ~ diagnosis * region * feature, data = EEG, subject = "id", within = c("region", "feature"), iter = 1)

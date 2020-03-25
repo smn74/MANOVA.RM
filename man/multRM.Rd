@@ -16,10 +16,10 @@ contains the factor variables of interest.}
 \code{formula}. Data must be in long format and must not contain missing values.}
 
 \item{subject}{The column name of the subjects in the data. NOTE: Subjects within 
-different groups of whole-plot factors must have individual labels, see Details for 
+different groups of between-subject factors must have individual labels, see Details for 
 more explanation.}
 
-\item{within}{Specifies the within-subjects factor(s) in the formula.}
+\item{within}{Specifies the within-subject factor(s) in the formula.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
 statistic. The default option is 10,000.}
@@ -67,14 +67,14 @@ The multRM() function provides the Wald-type
  NOTE: The within-subject factors need to be specified in the
  function call (\code{within =}).
  
- If subjects in different groups of the whole-plot factor have the same id, they will 
+ If subjects in different groups of the between-subject factor have the same id, they will 
  not be identified as different subjects and thus it is erroneously assumed that their 
  measurements belong to one subject. See \code{\link{RM}} for more explanations and an example.
 }
 \examples{
 \dontrun{
 data(EEG)
-library(tidyverse)
+library(tidyr)
 eeg <- spread(EEG, feature, resp)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, 
               subject = "id", within = "region", iter = 200)

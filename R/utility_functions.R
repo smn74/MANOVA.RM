@@ -126,7 +126,8 @@ summary.MANOVA <- function (object, ...) {
   print(a$formula)
   
   if(!is.null(b$within)){
-  cat("A multivariate repeated measures analysis with ", b$no.subf, "within-subject and ", b$no.whole, "between-subject factors.", "\n")
+  cat("A multivariate repeated measures analysis with ", b$no.subf, "within-subject factor(s) (", b$within, ")and ", b$no.whole,
+      "between-subject factor(s).", "\n")
 }
   
   cat("\n", "Descriptive:", "\n", sep = "")
@@ -194,7 +195,8 @@ summary.RM <- function (object, ...) {
   
   cat("Call:", "\n")
   print(a$formula)
-  cat("A repeated measures analysis with ", b$no.subf, "within-subject and ", b$nf-b$no.subf, "between-subject factors.", "\n")
+  cat("A repeated measures analysis with", b$no.subf, "within-subject factor(s) (", paste(object$withinfactors, collapse = ","), 
+      ") and", b$nf-b$no.subf, "between-subject factor(s).", "\n")
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")

@@ -4,7 +4,8 @@
 \alias{simCI}
 \title{Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts in multivariate factorial designs}
 \usage{
-simCI(object, contrast, contmat = NULL, type = NULL, base = 1, ...)
+simCI(object, contrast, contmat = NULL, type = NULL, base = 1,
+  interaction = TRUE, factor = NA, silent = FALSE, ...)
 }
 \arguments{
 \item{object}{A \code{MANOVA} object.}
@@ -20,6 +21,14 @@ for details on the types of contrasts available.}
 
 \item{base}{An integer specifying which group is considered the baseline group 
 for Dunnett contrasts, see \code{\link[multcomp]{contrMat}}.}
+
+\item{interaction}{Logical. If interaction = FALSE in models with more than one factor, the factor of interest for 
+the post-hoc analysis must be specified. Default is TRUE, which means post-hoc tests are performed for all factor
+level combinations.}
+
+\item{factor}{Only needed if interaction = FALSE. Specifies the factor for which post-hoc analysis are requested.}
+
+\item{silent}{Set to TRUE to suppress output.}
 
 \item{...}{Not used yet.}
 }

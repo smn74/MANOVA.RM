@@ -53,14 +53,12 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3){
+                   seed, nested.levels.unique = FALSE, dec = 3, ...){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
-  
-  input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling)
+
   output <- list()
   
   test1 <- hasArg(CPU)
@@ -72,6 +70,9 @@ MANOVA.wide <- function(formula, data,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   nr_hypo <- attr(terms(formula), "factors")
@@ -134,6 +135,7 @@ MANOVA.wide <- function(formula, data,
   } else {
     dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
     fac.groups <- do.call(list, dat2[, 2:(nf+1)])
+    lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
   }
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
@@ -258,7 +260,7 @@ MANOVA.wide <- function(formula, data,
     time <- results$time
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:nf]), ], n, mean_out)
+    descriptive <- cbind(unique(lev_names), n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)
     rownames(descriptive) <- NULL
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
@@ -284,7 +286,7 @@ MANOVA.wide <- function(formula, data,
     output$BSVar <- results$BSVar
     output$levels <- lev_names
     output$nested <- nest
-
+    output$modelcall <- MANOVA.wide
 
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

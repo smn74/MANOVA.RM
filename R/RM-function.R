@@ -6,14 +6,15 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side
 #'   contains the response variable and the right hand side contains the factor
-#'   variables of interest. An interaction term must be specified. The time variable
-#'   must be the last factor in the formula.
+#'   variables of interest. The within-subject factor(s)
+#'   must be the last factor(s) in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data. NOTE: Subjects within 
-#' different groups of whole-plot factors must have individual labels, see Details for 
+#' different groups of between-subject factors must have individual labels, see Details for 
 #' more explanation.
-#' @param no.subf The number of sub-plot factors in the data, default is 1.
+#' @param no.subf The number of within-subject factors in the data, default is 1. Alternatively, 
+#' the within-subject factors can be specified in \code{within}.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -28,6 +29,7 @@
 #' @param CI.method The method for calculating the quantiles used for the confidence intervals, 
 #'  either "t-quantile" (the default) or "resampling" (the quantile of the resampled WTS).
 #' @param dec Number of decimals the results should be rounded to. Default is 3.
+#' @param within Optional. Specifies within-subject factors in the formula.
 #'   
 #' @details The RM() function provides the Wald-type
 #'  statistic as well as the ANOVA-type statistic for repeated measures designs
@@ -40,12 +42,12 @@
 #'  approaches.
 #'  NOTE: The number of within-subject factors needs to be specified in the
 #'  function call. If only one factor is present, it is assumed that this is a
-#'  within-subjects factor (e.g. time).
+#'  within-subject factor (e.g. time).
 #'  
-#'  If subjects in different groups of the whole-plot factor have the same id, they will 
+#'  If subjects in different groups of the between-subject factor have the same id, they will 
 #'  not be identified as different subjects and thus it is erroneously assumed that their 
-#'  measurements belong to one subject. Example: Consider a study with one whole-plot factor 
-#'  "treatment" with levels verum and placebo and one sub-plot factor "time" (4 measurements).
+#'  measurements belong to one subject. Example: Consider a study with one between-subject factor 
+#'  "treatment" with levels verum and placebo and one within-subject factor "time" (4 measurements).
 #'  If subjects in the placebo group are labeled 1-20 and subjects in the verum group have 
 #'  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
 #'  40 individuals with 4 measurements each.
@@ -111,7 +113,7 @@
 
 RM <- function(formula, data, subject,
                no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm",
-               CPU, seed, CI.method = "t-quantile", dec = 3){
+               CPU, seed, CI.method = "t-quantile", dec = 3, within){
   
    if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
      stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
@@ -120,10 +122,6 @@ RM <- function(formula, data, subject,
   if (!(CI.method %in% c("t-quantile", "resampling"))){
     stop("CI.method must be one of 't-quantile' or 'resampling'!")
   }
-  
-  input_list <- list(formula = formula, data = data,
-                     subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling)
   
   test1 <- hasArg(CPU)
   if(!test1){
@@ -134,6 +132,15 @@ RM <- function(formula, data, subject,
   if(!test2){
     seed <- 0
   }
+  
+  test3 <- hasArg(within)
+  if(test3){
+    no.subf <- length(within)
+  }
+  
+  input_list <- list(formula = formula, data = data,
+                     subject = subject, 
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -146,6 +153,7 @@ RM <- function(formula, data, subject,
   
   
   dat2 <- data.frame(dat, subject = subject)
+  nf <- ncol(dat) - 1
   # check for missing values
   dt <- as.data.table(dat2)
   N <- NULL
@@ -154,9 +162,14 @@ RM <- function(formula, data, subject,
    stop("There are missing values in the data.")
   }
   
-  nf <- ncol(dat) - 1
-  nadat <- names(dat)
-  nadat2 <- nadat[-1]
+  nr_hypo <- attr(terms(formula), "factors")
+  perm_names <- t(attr(terms(formula), "factors")[-1, ])
+  fac_names <- colnames(nr_hypo)  # with interaction
+  fac_names_simple <- colnames(perm_names)  # without interaction
+  if(nf == 1){
+    fac_names_simple <- fac_names
+  }
+  
   fl <- NA
   for (aa in 1:nf) {
     fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
@@ -166,6 +179,29 @@ RM <- function(formula, data, subject,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  
+  # number of hypotheses
+  tmp <- 0
+  for (i in 1:nf) {
+    tmp <- c(tmp, choose(nf, i))
+    nh <- sum(tmp)
+  }
+  names(fl) <- fac_names_simple
+  
+  
+  # determine within- and between-subject factors
+  # no within-subject factors named
+  if(!test3){
+    within <- fac_names_simple[(length(fac_names_simple)-no.subf+1):length(fac_names_simple)]
+  } 
+  n.whole <- nf-no.subf
+  whole <- fac_names_simple[which(!fac_names_simple %in% within)]
+  lev.sub <- prod(fl[within])
+  
+  # correct formula?
+  if (length(fac_names) != nf && length(fac_names) != nh){
+    stop("Something is wrong with the formula. Please specify all or no interactions in crossed designs.")
+  }
   
   # check that subjects are correctly labeled (at least for 1 sub-plot) factor
   if(no.subf == 1){
@@ -179,9 +215,7 @@ RM <- function(formula, data, subject,
     # one-way layout
     dat2 <- dat2[order(dat2[, 2]), ]
     response <- dat2[, 1]
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(subject),
+    n <- plyr::ddply(dat2, fac_names_simple, plyr::summarise, Measure = length(subject),
                      .drop = F)$Measure
     # contrast matrix
     hypo <- diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)
@@ -200,80 +234,61 @@ RM <- function(formula, data, subject,
     Var_out <- round(results$Cov, dec)
     CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
-    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:(nf)]), ], n, mean_out, CI)
-    colnames(descriptive) <- c(nadat2, "n", "Means",
+    descriptive <- cbind(lev_names, n, mean_out, CI)
+    colnames(descriptive) <- c(fac_names_simple, "n", "Means",
                                paste("Lower", 100 * (1 - alpha), "%", "CI"),
                                paste("Upper", 100 * (1 - alpha), "%", "CI"))
     
-    colnames(WTS_out) <- cbind ("Test statistic", "df",
-                                "p-value")
-    colnames(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
-    output <- list()
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$WTS <- WTS_out
-    output$ATS <- ATS_out
-    output$resampling <- WTPS_out
-    output$plotting <- list(levels, fac_names, nf)
-    names(output$plotting) <- c("levels", "fac_names", "nf")
     # end one-way layout ------------------------------------------------------
   } else {
-    # no. of whole-plot (groups) and sub-plot (sub) factors
     dat2 <- dat2[do.call(order, dat2[, 2:(nf + 2)]), ]
-    n.whole <- nf - no.subf
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
-    response <- dat2[, 1]
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    fac_names_original <- fac_names
-    perm_names <- t(attr(terms(formula), "factors")[-1, ])
-    gr <- nadat2[1]
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(subject),
-                     .drop = F)
-    n.groups <- prod(fl[1:n.whole])
-    n.sub <- prod(fl) / n.groups
-    nind <- n[1, ]
-    for (i in 1:(n.groups-1)){
-      nind[i+1, ] <- n[(n.sub * i) + 1, ]
-    }
-    if (n.whole == 1){
-    zzz <- unique(dat2[, gr])
-    nind <- nind[order(order(zzz)), ]$Measure
-    n <- rep(nind, each=n.sub)
+    fac.groups <- do.call(list, dat2[, 2:(nf+1)])
+    if(length(whole) ==0){
+      Y <- list(dat2)
     } else {
-      nind <- nind$Measure
-      n <- n$Measure
+      Y<- split(dat2, dat2[, whole])#, lex.order = TRUE)
     }
+  nind <- sapply(Y, nrow)/lev.sub
+    
     # no factor combinations with less than 2 observations
     if (0 %in% nind || 1 %in% nind) {
       stop("There is at least one factor-level combination
            with less than 2 observations!")
     }
     
-    # number of whole-plot factors and their interactions
-    tmp_whole <- 0
-    for (i in 1:n.whole) {
-      tmp_whole <- c(tmp_whole, choose(n.whole, i))
-      whole_count <- sum(tmp_whole)
-    }
-    if (n.whole == 0){
-      whole_count <- 0
+    ## adapting formula argument, if interaction term missing
+    if (nrow(perm_names) != nh) {
+      outcome_names <- strsplit(as.character(formula), "~")[[2]]
+      form2 <- as.formula(paste(outcome_names, "~", paste(fac_names, collapse = "*")))
+      perm_names2 <- t(attr(terms(form2), "factors")[-1, ])
+      fac_names2 <- attr(terms(form2), "term.labels")
+      hyps <- HC(fl, perm_names2, fac_names2)
+      hypo_matrices <- hyps[[1]]
+      fac_names2 <- hyps[[2]]
+      # choose only relevant entries of the hypo matrices
+      indices <- grep(":", fac_names2, invert = TRUE)
+      hypo <- lapply(indices, function(x) hypo_matrices[[x]])
+      
+    } else if(nf !=1){
+      hyp <- HC(fl, perm_names, fac_names)
+      hypo <- hyp[[1]]
+      fac_names <- hyp[[2]]
     }
     
-    # number of hypotheses
-    tmp <- 0
-    for (i in 1:nf) {
-      tmp <- c(tmp, choose(nf, i))
-      nh <- sum(tmp)
+    hypo_matrices <- hypo
+    # correcting for "empty" combinations (if no interaction specified)
+    n.groups <- prod(fl[whole])
+    if(nf != 1 & length(Y) != n.groups){
+      index <- NULL
+      for(i in 1:length(Y)){
+        if(nrow(Y[[i]]) == 0){
+          index <- c(index, i)
+        }
+      }
+      Y <- Y[-index]
     }
-    if (length(fac_names) != nh) {
-      stop("Something is wrong: Perhaps a missing interaction term in formula?")
-    }
-    
-    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
-    fac_names <- HC(fl, perm_names, fac_names)[[2]]
+    response <- unlist(lapply(Y, function(x) x[, 1]))
     
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
     ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
@@ -307,7 +322,7 @@ RM <- function(formula, data, subject,
     CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
     descriptive <- cbind(lev_names, n, mean_out, CI)
-    colnames(descriptive) <- c(nadat2, "n", "Means",
+    colnames(descriptive) <- c(fac_names_simple, "n", "Means",
                                paste("Lower", 100 * (1 - alpha),"%", "CI"),
                                paste("Upper", 100 * (1 - alpha),"%", "CI"))
     
@@ -327,7 +342,8 @@ RM <- function(formula, data, subject,
       upper[[i]] <- mu[[i]] + sqrt(sigma[[i]] / n_groups[[i]]) *
         qt(1 - alpha / 2, df = n_groups[[i]])
     }
-    
+  }
+  
     # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
@@ -339,11 +355,12 @@ RM <- function(formula, data, subject,
     output$ATS <- ATS_out
     output$resampling <- WTPS_out
     output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper,
-                            fac_names_original, dat2, fl, alpha, nadat2, lev_names)
+                            fac_names_original, dat2, fl, alpha, fac_names_simple, lev_names)
     names(output$plotting) <- c("levels", "fac_names", "nf", "no.subf", "mu",
                                 "lower", "upper", "fac_names_original", "dat2", "fl",
                                 "alpha", "nadat2", "lev_names")
-  }
+    output$withinfactors <- within
+  
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)
