@@ -63,8 +63,7 @@ simCI <- function(object, contrast, contmat = NULL, type = NULL,
   BSD <- object$BSVar
   alpha <- object$input$alpha
   fl <- object$fl
-  lev <- subset(object$Descriptive, select = 1:n)
-  lev <- lev[-ncol(lev)]
+  lev <- subset(object$Descriptive, select = 1:nf)
   
   if(contrast == "user-defined"){
     if(is.null(contmat)){
