@@ -86,7 +86,12 @@
 #' 
 #' @seealso \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}
 #' 
-#' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
+#' @references 
+#' Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
+#'  of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM.
+#'  The R Journal, 11(2), 380-400.
+#' 
+#'  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
 #'  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
 #'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
@@ -147,12 +152,12 @@ RM <- function(formula, data, subject,
   
   dat2 <- data.frame(dat, subject = subject)
   # check for missing values
-  dt <- as.data.table(dat2)
-  N <- NULL
-  .N <- NULL
-  if(NROW(dt[, .N, by = subject][unique(N)])!=1){
-   stop("There are missing values in the data.")
-  }
+  # dt <- as.data.table(dat2)
+  # N <- NULL
+  # .N <- NULL
+  # if(NROW(dt[, .N, by = subject][unique(N)])!=1){
+  #  stop("There are missing values in the data.")
+  # }
   
   nf <- ncol(dat) - 1
   nadat <- names(dat)

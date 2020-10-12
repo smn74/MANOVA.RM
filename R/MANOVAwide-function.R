@@ -26,6 +26,7 @@
 #'   factor are the same for each level of the main factor. For an example and more explanations
 #'   see the GFD package and the corresponding vignette.
 #' @param dec Number of decimals the results should be rounded to. Default is 3.
+#' @param ... Not used yet.
 #'  
 #' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
 #' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.

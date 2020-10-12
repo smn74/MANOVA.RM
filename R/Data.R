@@ -18,7 +18,7 @@
 #' Journal of Multivariate Analysis, 153, 255-265.
 #' 
 #' @examples 
-#'   library(tidyverse)
+#'   library(ggplot2)
 #'   ggplot(o2cons, aes(x=Group, y=O2)) + geom_point(alpha=0.5) + facet_grid(Staphylococci~Time) +
 #'   stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red") 
 #' 
@@ -55,7 +55,7 @@
 #'   Doi: 10.1080/00273171.2018.1446320.
 #'   
 #' @examples 
-#'   library(tidyverse)
+#'   library(ggplot2)
 #'   ggplot(EEG, aes(x=sex, y=resp)) + geom_point(alpha=0.5) + facet_grid(region+feature~diagnosis) +
 #'      stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red")
 #'   
@@ -75,7 +75,7 @@
 #' feature (brain rate, complexity) structure the response vector.
 #'
 #'@details Note that this data set contains exactly the same data as the data set 'EEG', only the format is different. The 
-#'transformation between the different formats can be achieved using, e.g., the \code{tidyverse} package.
+#'transformation between the different formats can be achieved using, e.g., the \code{tidyr} package.
 #'
 #' @format A data frame with 160 rows and 9 variables:
 #' \describe{

@@ -28,7 +28,7 @@ In the two-dimensional case, confidence ellipsoids can be plotted via the generi
 data(EEG)
 EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
                     data = EEG, subject = "id", resampling = "paramBS", 
-                    alpha = 0.05, iter = 100, CPU = 1)
+                    alpha = 0.05, iter = 10, CPU = 1)
 conf.reg(EEG_mod, nullhypo = "sex")
 
 

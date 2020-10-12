@@ -61,7 +61,11 @@
 #' 
 #' @seealso \code{\link{RM}}
 #'   
-#' @references Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
+#' @references
+#' Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis of Multivariate Data 
+#' and Repeated Measures Designs with the R Package MANOVA.RM. The R Journal, 11(2), 380-400.
+#' 
+#'   Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
 #'   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
 #'   of Multivariate Analysis, 140, 291-301.
 #'   

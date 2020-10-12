@@ -209,11 +209,11 @@ The `conf.reg` function takes as arguments:
 * `object`: A `MANOVA` object calculated via `MANOVA()` or `MANOVA.wide()`.
 * `nullhypo`: In designs involving more than one factor, it is necessary to specify the null hypothesis, i.e., the contrast of interest.
 
-As an example, we consider the data set `water` from the package `HSAUR`. The data set contains measurements of mortality and drinking water hardness for 61 cities in England and Wales. Suppose we want to analyse whether these measurements differ between northern and southern towns. Since the data set is in wide format, we need to use the `MANOVA.wide` function.
+As an example, we consider the data set `water` from the package `HSAUR3`. The data set contains measurements of mortality and drinking water hardness for 61 cities in England and Wales. Suppose we want to analyse whether these measurements differ between northern and southern towns. Since the data set is in wide format, we need to use the `MANOVA.wide` function.
 
 ```{r}
-if (requireNamespace("HSAUR", quietly = TRUE)) {
-library(HSAUR)
+if (requireNamespace("HSAUR3", quietly = TRUE)) {
+library(HSAUR3)
 data(water)
 test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 1000, resampling = "paramBS", CPU = 1, seed = 123)
 summary(test)
@@ -254,7 +254,7 @@ As an example, we consider the `EEG_MANOVA` example from above:
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 # the same but with Dunnett contrasts using group 2 as baseline
-simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
+#simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
 # a one-way layout using MANOVA.wide():
 oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
                       iter = 1000, CPU = 1)
@@ -351,7 +351,7 @@ As an example, we again use the EEG dataset. This time, imagine we have two outc
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
-fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 200)
+fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 200, CPU = 1)
 summary(fit)
 ```
 
@@ -397,8 +397,7 @@ For the `multRM()` function there is no GUI available yet.
 * Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and heteroscedastic MANOVA. 
   Journal of Multivariate Analysis, 165, 166-179, DOI: 10.1016/j.jmva.2017.12.008.
 
-* Friedrich, S., Konietschke, F., and Pauly, M. (2018). Analysis of Multivariate Data and Repeated Measures Designs with the
-R Package MANOVA.RM. arXiv preprint arXiv:1801.08002.
+* Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM. The R Journal, 11(2), 380-400.
 
 * Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 

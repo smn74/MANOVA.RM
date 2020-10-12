@@ -44,6 +44,6 @@ feature (brain rate, complexity) structure the response vector.
 }
 \details{
 Note that this data set contains exactly the same data as the data set 'EEG', only the format is different. The 
-transformation between the different formats can be achieved using, e.g., the \code{tidyverse} package.
+transformation between the different formats can be achieved using, e.g., the \code{tidyr} package.
 }
 \keyword{datasets}

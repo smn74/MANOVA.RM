@@ -107,7 +107,11 @@ summary(EEG_model)
 
 }
 \references{
-Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
+Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
+ of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM.
+ The R Journal, 11(2), 380-400.
+
+ Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 
   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
