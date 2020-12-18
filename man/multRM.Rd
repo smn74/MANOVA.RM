@@ -10,7 +10,8 @@ multRM(formula, data, subject, within, iter = 10000, alpha = 0.05,
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side
 contains the matrix of response variables (using cbind()) and the right hand side 
-contains the factor variables of interest.}
+contains the factor variables of interest. The within-subject factors must be specified
+ last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
 \code{formula}. Data must be in long format and must not contain missing values.}
