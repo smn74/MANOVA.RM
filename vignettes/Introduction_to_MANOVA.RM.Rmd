@@ -254,8 +254,17 @@ As an example, we consider the `EEG_MANOVA` example from above:
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 # the same but with Dunnett contrasts using group 2 as baseline
-#simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
-# a one-way layout using MANOVA.wide():
+simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
+```
+
+Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
+
+```{r}
+simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
+```
+
+A one-way layout using MANOVA.wide():
+```{r}
 oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
                       iter = 1000, CPU = 1)
 # and a user-defined contrast matrix
@@ -329,6 +338,7 @@ The `multRM()` function provides a combination of the approaches described above
 
 * `formula`: A model formula object. The left hand side contains the matrix of 
 response variables (using cbind()) and the right hand side contains the factor variables of interest.
+The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
 * `data`: A data.frame, list or environment containing the variables in `formula`. Data must be 
 in long format and must not contain missing values.
 * `subject`: The column name of the subjects in the data. NOTE: Subjects within 

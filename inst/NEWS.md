@@ -1,3 +1,8 @@
+# MANOVA.RM 0.4.3
+* fix ordering of data for multRM
+* update documentation
+* fix bug in simCI without interactions
+
 # MANOVA.RM 0.4.1
 * include new function multRM for multivariate repeated measures designs
 * update documentation and vignette

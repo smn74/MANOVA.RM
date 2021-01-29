@@ -190,7 +190,9 @@ multRM <- function(formula, data, subject, within,
     names(fl) <- within
     # end one-way layout ------------------------------------------------------
   } else {
-    dat2 <- dat[do.call(order, dat[, c(2:(no.whole+1), ncol(dat))]), ]
+    dat2 <- dat[do.call(order, dat[, c(2:(no.whole+1),      #order whole-plot factors
+                                       ncol(dat),           # order by subject
+                                       ((no.whole+2):(no.whole+2+no.subf-1)))]), ] # order sub-plot factors
    # dat2 <- dat2[order(dat2[, "subject"]), ]
     #fac.groups <- do.call(list, dat2[, 2:(nf+1)])
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
