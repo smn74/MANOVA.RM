@@ -253,14 +253,12 @@ As an example, we consider the `EEG_MANOVA` example from above:
 ```{r}
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
-# the same but with Dunnett contrasts using group 2 as baseline
-simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
 ```
 
 Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
 
 ```{r}
-simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
+#simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
 ```
 
 A one-way layout using MANOVA.wide():

@@ -151,13 +151,6 @@ RM <- function(formula, data, subject,
   
   
   dat2 <- data.frame(dat, subject = subject)
-  # check for missing values
-  # dt <- as.data.table(dat2)
-  # N <- NULL
-  # .N <- NULL
-  # if(NROW(dt[, .N, by = subject][unique(N)])!=1){
-  #  stop("There are missing values in the data.")
-  # }
   
   nf <- ncol(dat) - 1
   nadat <- names(dat)
@@ -171,14 +164,14 @@ RM <- function(formula, data, subject,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  n.whole <- nf - no.subf
   
-  # check that subjects are correctly labeled (at least for 1 sub-plot) factor
-  if(no.subf == 1){
-    if(nrow(data)/length(unique(subject)) != fl[length(fl)]){
-      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points
-                  (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
+  # check that subjects are correctly labeled
+    if(nrow(data)/length(unique(subject)) != prod(fl[(n.whole+1):length(fl)])){
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of within-subject factor levels
+                  (", prod(fl[(n.whole+1):length(fl)]), ") does not equal the total number of observations (", nrow(data), ")."))
     }
-  }
+  
 
   if (nf == 1) {
     # one-way layout
@@ -227,7 +220,6 @@ RM <- function(formula, data, subject,
   } else {
     # no. of whole-plot (groups) and sub-plot (sub) factors
     dat2 <- dat2[do.call(order, dat2[, 2:(nf + 2)]), ]
-    n.whole <- nf - no.subf
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
     response <- dat2[, 1]
     nr_hypo <- attr(terms(formula), "factors")
