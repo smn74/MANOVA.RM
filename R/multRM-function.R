@@ -131,6 +131,11 @@ multRM <- function(formula, data, subject, within,
   fac_names <- colnames(nr_hypo)
   fac_names_simple <- colnames(perm_names)
   
+  if(is.null(fac_names_simple)){
+      fac_names_simple <- within
+  }
+  
+  
   if(!all(within %in% fac_names)){
     stop(paste0("The within-subjects factor ", within[which(!(within %in% fac_names_simple))], " is not part of the formula."))
   }
