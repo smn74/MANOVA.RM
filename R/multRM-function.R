@@ -186,7 +186,7 @@ multRM <- function(formula, data, subject, within,
   
   # check that subjects are correctly labeled / no missing values / no within-factors ignored
     if(nrow(data)/length(unique(subject)) != prod(fl[within])){
-      error(paste0("The number of subjects (", length(unique(subject)), ") times the number of within-subject factor levels
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of within-subject factor levels
                   (", prod(fl[within]), ") does not equal the total number of observations (", nrow(data), "). 
                   Check for missing values in the data."))
     }
