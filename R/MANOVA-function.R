@@ -17,8 +17,9 @@
 #' @param resampling The resampling method to be used, one of "paramBS"
 #'   (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
 #'   Rademacher weights).
-#' @param CPU The number of cores used for parallel computing. If omitted, cores are
-#'   detected via \code{\link[parallel]{detectCores}}.
+#' @param para If parallel computing should be used. Default is FALSE.
+#' @param CPU The number of cores used for parallel computing. If not specified, cores
+#'  are detected via \code{\link[parallel]{detectCores}}.
 #' @param seed A random seed for the resampling procedure. If omitted, no 
 #'   reproducible seed is set.
 #' @param nested.levels.unique A logical specifying whether the levels of the nested factor(s)
@@ -56,7 +57,7 @@
 #' @examples data(EEG)
 #' EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
 #'                     data = EEG, subject = "id", resampling = "paramBS", 
-#'                     alpha = 0.05, iter = 10, CPU = 1)
+#'                     alpha = 0.05, iter = 10)
 #' summary(EEG_mod)
 #' 
 #' @seealso \code{\link{RM}}
@@ -96,7 +97,8 @@
 #' @export
 
 MANOVA <- function(formula, data, subject,
-                   iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
+                   iter = 10000, alpha = 0.05, resampling = "paramBS", 
+                   para = FALSE, CPU,
                    seed, nested.levels.unique = FALSE, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
@@ -107,9 +109,11 @@ MANOVA <- function(formula, data, subject,
     stop("For data in wide format, please use function MANOVA.wide()")
   }
   
-  test1 <- hasArg(CPU)
-  if(!test1){
-    CPU <- parallel::detectCores()
+  if(para){
+    test1 <- hasArg(CPU)
+    if(!test1){
+      CPU <- parallel::detectCores()
+    }
   }
   
   test2 <- hasArg(seed)
@@ -170,7 +174,8 @@ MANOVA <- function(formula, data, subject,
     quantiles <- matrix(NA, 2, 1)
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
+    results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha,
+                           resampling, n.groups = fl, p, para, CPU, seed, nf)    
     WTS_out[1, ] <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
@@ -305,14 +310,13 @@ MANOVA <- function(formula, data, subject,
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, n.groups, p, CPU, seed, nf)
+                             iter, alpha, resampling, n.groups, p,
+                             para, CPU, seed, nf)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)
       quantiles[i, ] <- results$quantiles
     }
-    # time needed for resampling calculations
-    time <- results$time
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
@@ -325,7 +329,6 @@ MANOVA <- function(formula, data, subject,
   }
   # Output ------------------------------------------------------
   output <- list()
-  output$time <- time
   output$input <- input_list
   output$Descriptive <- descriptive
   output$Covariance <- Var_out

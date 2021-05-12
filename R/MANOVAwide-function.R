@@ -17,8 +17,9 @@
 #' @param resampling The resampling method to be used, one of "paramBS"
 #'   (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
 #'   Rademacher weights). The Wild Bootstrap is calculated for all test statistics.
-#' @param CPU The number of cores used for parallel computing. If omitted, cores are
-#'   detected via \code{\link[parallel]{detectCores}}.
+#' @param para If parallel computing should be used. Default is FALSE.
+#' @param CPU The number of cores used for parallel computing. If not specified, cores
+#'  are detected via \code{\link[parallel]{detectCores}}.
 #' @param seed A random seed for the resampling procedure. If omitted, no 
 #'   reproducible seed is set.
 #' @param nested.levels.unique A logical specifying whether the levels of the nested factor(s)
@@ -45,7 +46,7 @@
 #' additive <- gl(2, 5, length = 20, labels = c("Low", "High"))
 #' example <- data.frame(tear, gloss, opacity, rate, additive)
 #' fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, 
-#' data = example, iter = 100, CPU = 1)
+#' data = example, iter = 1000)
 #' summary(fit)
 #'
 #' @seealso \code{\link{MANOVA}}
@@ -53,7 +54,8 @@
 #' @export
 
 MANOVA.wide <- function(formula, data,
-                   iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
+                   iter = 10000, alpha = 0.05, resampling = "paramBS", 
+                   para = FALSE, CPU,
                    seed, nested.levels.unique = FALSE, dec = 3, ...){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
@@ -62,9 +64,11 @@ MANOVA.wide <- function(formula, data,
 
   output <- list()
   
-  test1 <- hasArg(CPU)
-  if(!test1){
-    CPU <- parallel::detectCores()
+  if(para){
+    test1 <- hasArg(CPU)
+    if(!test1){
+      CPU <- parallel::detectCores()
+    }
   }
   
   test2 <- hasArg(seed)
@@ -118,7 +122,8 @@ MANOVA.wide <- function(formula, data,
   
   # correct formula?
   if (length(fac_names) != nf && length(fac_names) != nh){
-    stop("Something is wrong with the formula. Please specify all or no interactions in crossed designs.")
+    stop("Something is wrong with the formula. Please specify all or no 
+         interactions in crossed designs.")
   }
   # mixture of nested and crossed designs is not possible
   if (length(fac_names) != nf && 2 %in% nr_hypo) {
@@ -251,14 +256,12 @@ MANOVA.wide <- function(formula, data,
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat.wide(Y2, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, CPU, seed, p)
+                             iter, alpha, resampling, para, CPU, seed, p)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)
       quantiles[i, ] <- results$quantiles
     }
-    # time needed for resampling calculations
-    time <- results$time
     mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
     descriptive <- cbind(unique(lev_names), n, mean_out)

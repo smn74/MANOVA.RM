@@ -4,14 +4,16 @@
 \alias{RM}
 \title{Tests for Repeated Measures in Semi-Parametric Factorial Designs}
 \usage{
-RM(formula, data, subject, no.subf = 1, iter = 10000, alpha = 0.05,
-  resampling = "Perm", CPU, seed, CI.method = "t-quantile", dec = 3)
+RM(formula, data, subject, within, no.subf, iter = 10000, alpha = 0.05,
+  resampling = "Perm", para = FALSE, CPU, seed,
+  CI.method = "t-quantile", dec = 3)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side
 contains the response variable and the right hand side contains the factor
-variables of interest. An interaction term must be specified. The within-subject factor(s)
-must be the last factor(s) in the formula.}
+variables of interest. The within-subject factor(s)
+must be the last factor(s) in the formula, e.g. 
+\code{outcome ~ between1 * between2 * within1 * within2}.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
 \code{formula}. Data must be in long format and must not contain missing values.}
@@ -20,7 +22,11 @@ must be the last factor(s) in the formula.}
 different groups of between-subject factors must have individual labels, see Details for 
 more explanation.}
 
-\item{no.subf}{The number of within-subject factors in the data, default is 1.}
+\item{within}{Specifies the within-subject factor(s) in the formula. Either this
+or \code{no.subf} must be specified.}
+
+\item{no.subf}{The number of within-subject factors in the data. Must be specified if
+\code{within} is omitted.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
 statistic. The default option is 10,000.}
@@ -32,8 +38,10 @@ all observations), "paramBS" (parametric bootstrap approach) and "WildBS"
 (wild bootstrap approach with Rademacher weights). Except for the Wild Bootstrap,
 all methods are applied to the WTS only.}
 
-\item{CPU}{The number of cores used for parallel computing. If omitted, cores are
-detected via \code{\link[parallel]{detectCores}}.}
+\item{para}{If parallel computing should be used. Default is FALSE.}
+
+\item{CPU}{The number of cores used for parallel computing. If not specified, cores
+are detected via \code{\link[parallel]{detectCores}}.}
 
 \item{seed}{A random seed for the resampling procedure. If omitted, no 
 reproducible seed is set.}
@@ -73,9 +81,10 @@ The RM() function provides the Wald-type
  allows for different sample sizes. In addition to the
  asymptotic p-values, it also provides p-values based on resampling
  approaches.
- NOTE: The number of within-subject factors needs to be specified in the
- function call. If only one factor is present, it is assumed that this is a
- within-subject factor (e.g. time).
+ NOTE: The number of within-subject factors or their labels need
+  to be specified in the function call. If only one factor is 
+  present, it is assumed that this is a within-subject factor
+  (e.g. time).
  
  If subjects in different groups of the between-subject factor have the same id, they will 
  not be identified as different subjects and thus it is erroneously assumed that their 
@@ -89,7 +98,8 @@ The RM() function provides the Wald-type
 data(o2cons)
 \dontrun{
 oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-            subject = "Subject", no.subf = 2, iter = 1000, resampling = "Perm", CPU = 1)
+            subject = "Subject", no.subf = 2, iter = 1000,
+            resampling = "Perm")
 summary(oxy)
 plot(oxy, factor = "Group") 
  
@@ -100,8 +110,9 @@ plot(oxy, factor = "Group")
 # and 'feature'
 data(EEG)
 EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
-               data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
-               iter = 1000,  alpha = 0.01, CPU = 4, seed = 987, dec = 2)
+               data = EEG, subject = "id", within = c("feature", "region"),
+               resampling = "WildBS",
+               iter = 1000,  alpha = 0.01, seed = 987, dec = 2)
 summary(EEG_model)
 }
 
@@ -114,14 +125,14 @@ Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 
-  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
-  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
-  Doi: 10.1080/00273171.2018.1446320.
+ Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+ Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+ Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
+ Doi: 10.1080/00273171.2018.1446320.
  
-  Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
-  R-package for the Analysis of General Factorial Designs. 
-  Journal of Statistical Software, 79(1), 1-18.
+ Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
+ R-package for the Analysis of General Factorial Designs. 
+ Journal of Statistical Software, 79(1), 1-18.
 }
 \seealso{
 \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}

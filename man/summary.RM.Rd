@@ -12,6 +12,7 @@
 \item{...}{Additional parameters (currently not used)}
 }
 \description{
-Returns a summary of the results including mean values, variances and sample sizes for all groups as well
+Returns a summary of the results including mean values, variances 
+and sample sizes for all groups as well
 as test statistics with degrees of freedom and p-values
 }

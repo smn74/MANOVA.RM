@@ -1,33 +1,32 @@
 ## function for calculating test statistics, permutation etc for repeated measures
-RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, 
-                   n.groups, resampling, CPU, seed, CI.method){
+RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, 
+                  resampling, CPU, seed, CI.method){
   
   N <- sum(nind)
   H <- hypo_matrix
-  x <- data
+  a <- length(Y)
+  n <- rep(nind, each = n.sub)
   
-  #---------------- useful matrices ---------------------#
-  A <- diag(n.sub) %x% t(rep(1 / nind[1], nind[1]))
-  for (ii in 2:length(nind)){
-    B <- diag(n.sub) %x% t(rep(1 / nind[ii], nind[ii]))
-    A <- magic::adiag(A, B)
-  } 
-  # -----------------------------------------------------#
-  means <- A %*% x
+  means <- sapply(Y, colMeans)
+  means <- c(means)
   
-  V <- list(NA)
-  n.temp <- n.sub*cumsum(c(0, nind))
-  for (i in 1:n.groups){
-    y <- matrix(x[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
-    V[[i]] <- 1 / nind[i] * cov(y)
-  }
-  
-  sigma_hat <- V[[1]]
-  for (i in 2:n.groups){
-    sigma_hat <- magic::adiag(sigma_hat, V[[i]])
+  V <- lapply(Y, cov)
+  sigma_hat <- 1/nind[1]*V[[1]]
+  if(a != 1){
+    for (i in 2:a){
+      sigma_hat <- magic::adiag(sigma_hat, 1/nind[i]*V[[i]])
+    }
   }
   Sn <- N * sigma_hat
   
+  
+  #---------------- useful matrices ---------------------#
+   A <- diag(n.sub) %x% t(rep(1 / nind[1], nind[1]))
+   for (ii in 2:length(nind)){
+     B <- diag(n.sub) %x% t(rep(1 / nind[ii], nind[ii]))
+     A <- magic::adiag(A, B)
+   } 
+  # -----------------------------------------------------#
   # WTS
   T <- t(H) %*% MASS::ginv(H %*% Sn %*% t(H)) %*% H
   WTS <- N * t(means) %*% T %*% means
@@ -49,24 +48,23 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   
   #----------------------------Permutation --------------------------------#
   Perm <- function(arg, ...){
+    xperm <- sample(Y, replace = FALSE)
+    meansP <- sapply(xperm, colMeans)
+    meansP <- c(meansP)
     
-    xperm <- sample(x, replace = FALSE)
-    meansP <- A %*% xperm
-    VP <- list(NA)
-    for(i in 1:n.groups){
-      yperm <- matrix(xperm[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
-      VP[[i]] <- 1 / nind[i] * cov(yperm)
-    }
-    
-    sigma_hatP <- VP[[1]]
-    for (i in 2:n.groups){
-      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    VP <- lapply(xperm, cov)
+    sigma_hatP <- 1/nind[1]*VP[[1]]
+    if(a != 1){
+      for (i in 2:a){
+        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
+      }
     }
     SnP <- N * sigma_hatP
-    
+    # WTPS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
-    WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
-    return(WTPS)
+    WTPS <- N * t(meansP) %*% TP %*% meansP
+    permout <- list(WTPS = WTPS, ATS_res = NA)
+    return(permout)
   }
   
   #--------------------------------- parametric bootstrap ---------------------------#
@@ -74,66 +72,65 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
     # calculate mvrnorm for each group
     XP <- list()
     meansP <- list()
-    for (i in 1:n.groups){
-      XP[[i]] <- MASS::mvrnorm(nind[i], mu = rep(0, n.sub), Sigma = nind[i]*V[[i]])
+    for (i in 1:a){
+      XP[[i]] <- MASS::mvrnorm(nind[i], mu = rep(0, n.sub), Sigma = V[[i]])
       meansP[[i]] <- colMeans(XP[[i]])
     }
     meansP <- unlist(meansP)
     
-    VP <- list(NA)
-    for(i in 1:n.groups){
-      VP[[i]] <- 1 / nind[i] * cov(XP[[i]])
-    }
+    VP <- lapply(XP, cov)
     
-    sigma_hatP <- VP[[1]]
-    for (i in 2:n.groups){
-      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    sigma_hatP <- 1/nind[1]*VP[[1]]
+    if (a != 1){
+      for (i in 2:a){
+        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
+      }
     }
     SnP <- N * sigma_hatP
     
+    # WTS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
+    
     # ATS
     C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
-    D <- diag(C) * diag(ncol(C))
     spur <- sum(diag(C %*% SnP))
-    Lambda <- diag(1 / (n - 1))
     ATS_res <- N / spur * t(meansP) %*% C %*% meansP
-    return(list(WTPS, ATS_res))
+    
+    pbs <- list(WTPS = WTPS, ATS_res = ATS_res, meansP = meansP)
+    return(pbs)
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
   WBS <- function(ii, ...){
     VP <- list(NA)
     xperm <- list(NA)
-    for (i in 1:n.groups){
-      y <- matrix(x[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
-      means2 <- rep(colMeans(y), nind[i])
+    meansP <- list()
+    for (i in 1:a){
       epsi <- 2*rbinom(nind[i], 1, 1/2)-1
-      xperm[[i]] <- rep(epsi, n.sub)*(x[(n.temp[i]+1):n.temp[i+1]]-means2)
-      yperm <- matrix(unlist(xperm[[i]])[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
-      VP[[i]] <- 1 / nind[i] * cov(yperm)
+      xperm[[i]] <- epsi*(Y[[i]] - colMeans(Y[[i]]))
+      VP[[i]] <- 1 / nind[i] * cov(xperm[[i]])
+      meansP[[i]] <- colMeans(xperm[[i]])
     }
+    meansP <- unlist(meansP)
     
     sigma_hatP <- VP[[1]]
-    for (i in 2:n.groups){
+    if (a != 1){
+    for (i in 2:a){
       sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    }
     }
     SnP <- N * sigma_hat
     
-    xperm <- unlist(xperm)
-    meansP <- A %*% xperm
-    
     # WTS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
-    WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
+    WTPS <- N * t(meansP) %*% TP %*% meansP
     # ATS
     C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
-    D <- diag(C) * diag(ncol(C))
     spur <- sum(diag(C %*% SnP))
-    Lambda <- diag(1 / (n - 1))
     ATS_res <- N / spur * t(meansP) %*% C %*% meansP
-    return(list(WTPS, ATS_res))
+    wildbs <- list(WTPS = WTPS, ATS_res = ATS_res)
+    return(wildbs)
   }
   
   cl <- makeCluster(CPU)
@@ -142,22 +139,21 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   }
   
   if(resampling == "Perm"){
-    WTPS <- parSapply(cl, 1:iter, FUN = Perm)
-    ecdf_WTPS <- ecdf(WTPS)
-    p_valueWTPS <- 1-ecdf_WTPS(WTS)
-    p_valueATS_res <- NA
+    bs_out <- parallel::parLapply(cl, 1:iter, Perm)
   } else if(resampling == "paramBS"){
-    WTPS <- parSapply(cl, 1:iter, FUN = PBS)
-    ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
-    p_valueWTPS <- 1-ecdf_WTPS(WTS)    
-    ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
-    p_valueATS_res <- 1-ecdf_ATS_res(ATS)
+    bs_out <- parallel::parLapply(cl, 1:iter, PBS)
   } else if(resampling == "WildBS"){
-    WTPS <- parSapply(cl, 1:iter, FUN = WBS)
-    ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
-    p_valueWTPS <- 1-ecdf_WTPS(WTS)    
-    ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
-    p_valueATS_res <- 1-ecdf_ATS_res(ATS)    
+    bs_out <- parallel::parLapply(cl, 1:iter, WBS)
+  }
+  WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
+  ATSbs <- parallel::parSapply(cl, bs_out, function(x) x$ATS_res)
+  ecdf_WTPS <- ecdf(WTPS)
+  p_valueWTPS <- 1-ecdf_WTPS(WTS)
+  if(!is.na(ATSbs[1])){
+    ecdf_ATS <- ecdf(ATSbs)
+    p_valueATS_res <- 1 - ecdf_ATS(ATS)
+  } else {
+    p_valueATS_res <- NA
   }
   
   parallel::stopCluster(cl)

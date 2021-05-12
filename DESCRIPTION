@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Resampling-Based Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.4.3
-Date: 2021-02-02
+Version: 0.5.1
+Date: 2021-05-12
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@med.uni-goettingen.de>
 Depends:
@@ -14,7 +14,7 @@ Description: Implemented are various tests for semi-parametric repeated measures
     methods, novel bootstrap and permutation approaches are implemented as well. These provide more
     accurate results in case of small to moderate sample sizes. Furthermore, post-hoc 
     comparisons are provided for the multivariate analyses.
-    Friedrich, S., Konietschke, F. and Pauly, M. (2018) <arXiv:1801.08002>.
+    Friedrich, S., Konietschke, F. and Pauly, M. (2019) <doi:10.32614/RJ-2019-051>.
 License: GPL-2 | GPL-3
 Imports:
     plyr (>= 1.8.4),

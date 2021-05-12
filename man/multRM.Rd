@@ -5,7 +5,7 @@
 \title{Tests for Repeated Measures in Multivariate Semi-Parametric Factorial Designs}
 \usage{
 multRM(formula, data, subject, within, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU, seed, dec = 3)
+  resampling = "paramBS", para = FALSE, CPU, seed, dec = 3)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side
@@ -30,8 +30,10 @@ statistic. The default option is 10,000.}
 \item{resampling}{The resampling method to be used, one of "paramBS" (parametric bootstrap
 approach) and "WildBS" (wild bootstrap approach with Rademacher weights).}
 
-\item{CPU}{The number of cores used for parallel computing. If omitted, cores are
-detected via \code{\link[parallel]{detectCores}}.}
+\item{para}{If parallel computing should be used. Default is FALSE.}
+
+\item{CPU}{The number of cores used for parallel computing. If not specified, cores
+are detected via \code{\link[parallel]{detectCores}}.}
 
 \item{seed}{A random seed for the resampling procedure. If omitted, no 
 reproducible seed is set.}
@@ -78,7 +80,7 @@ data(EEG)
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, 
-              subject = "id", within = "region", iter = 200)
+              subject = "id", within = "region")
 summary(fit)
 }
 

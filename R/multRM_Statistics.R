@@ -4,7 +4,8 @@
 # n: observations in all the groups
 # nind: number of individuals
 
-multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU, seed, p, t){
+multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
+                             para, CPU, seed, p, t){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -98,27 +99,44 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   }
   #-------------------------------------------------------------
   
-  
-  cl <- makeCluster(CPU)
-  if(seed != 0){
-    parallel::clusterSetRNGStream(cl, iseed = seed)
+  if(para){
+    cl <- makeCluster(CPU)
+    if(seed != 0){
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
+    if(resampling == "paramBS"){
+      bs_out <- parallel::parLapply(cl, 1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- parallel::parLapply(cl, 1:iter, WBS)
+    }
+    
+    WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
+    MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
+    BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
+    BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
+    parallel::stopCluster(cl)
+  } else {
+    
+    if(seed != 0){
+      set.seed(seed)
+    }
+    if(resampling == "paramBS"){
+      bs_out <- lapply(1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- lapply(1:iter, WBS)
+    }
+    
+    WTPS <- sapply(bs_out, function(x) x$WTPS)
+    MATSbs <- sapply(bs_out, function(x) x$Q_N_P)
+    BSmeans <- lapply(bs_out, function(x) x$meansP)
+    BSVar <- lapply(bs_out, function(x) x$DP)
   }
-  if(resampling == "paramBS"){
-    bs_out <- parallel::parLapply(cl, 1:iter, PBS)
-  } else if(resampling == "WildBS"){
-    bs_out <- parallel::parLapply(cl, 1:iter, WBS)
-  }
- 
-  WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
-  MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
   ecdf_WTPS <- ecdf(WTPS)
   p_valueWTPS <- 1-ecdf_WTPS(WTS)
   ecdf_MATS <- ecdf(MATSbs)
   p_valueMATS <- 1 - ecdf_MATS(Q_N)
   
-  BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
-  BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
-  parallel::stopCluster(cl)
+  
   
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
@@ -132,7 +150,8 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling, CPU,
   MATS_out <- Q_N
   WTPS_out <- c(p_valueWTPS, p_valueMATS)
   result <- list(WTS = WTS_out, WTPS = WTPS_out, MATS = MATS_out,
-                 Cov = Sn, Mean = means, time = time, quantiles = quantiles, BSmeans = BSmeans,
+                 Cov = Sn, Mean = means, quantiles = quantiles,
+                 BSmeans = BSmeans,
                  BSVar = BSVar)
   return(result)
 }

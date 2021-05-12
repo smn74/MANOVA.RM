@@ -6,14 +6,18 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side
 #'   contains the response variable and the right hand side contains the factor
-#'   variables of interest. An interaction term must be specified. The within-subject factor(s)
-#'   must be the last factor(s) in the formula.
+#'   variables of interest. The within-subject factor(s)
+#'   must be the last factor(s) in the formula, e.g. 
+#'   \code{outcome ~ between1 * between2 * within1 * within2}.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data. NOTE: Subjects within 
 #' different groups of between-subject factors must have individual labels, see Details for 
 #' more explanation.
-#' @param no.subf The number of within-subject factors in the data, default is 1.
+#' @param within Specifies the within-subject factor(s) in the formula. Either this
+#'  or \code{no.subf} must be specified.
+#' @param no.subf The number of within-subject factors in the data. Must be specified if
+#' \code{within} is omitted.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -21,8 +25,9 @@
 #'    all observations), "paramBS" (parametric bootstrap approach) and "WildBS" 
 #'    (wild bootstrap approach with Rademacher weights). Except for the Wild Bootstrap,
 #'    all methods are applied to the WTS only.
-#' @param CPU The number of cores used for parallel computing. If omitted, cores are
-#'   detected via \code{\link[parallel]{detectCores}}.
+#' @param para If parallel computing should be used. Default is FALSE.
+#' @param CPU The number of cores used for parallel computing. If not specified, cores
+#'  are detected via \code{\link[parallel]{detectCores}}.
 #' @param seed A random seed for the resampling procedure. If omitted, no 
 #'   reproducible seed is set.
 #' @param CI.method The method for calculating the quantiles used for the confidence intervals, 
@@ -38,9 +43,10 @@
 #'  allows for different sample sizes. In addition to the
 #'  asymptotic p-values, it also provides p-values based on resampling
 #'  approaches.
-#'  NOTE: The number of within-subject factors needs to be specified in the
-#'  function call. If only one factor is present, it is assumed that this is a
-#'  within-subject factor (e.g. time).
+#'  NOTE: The number of within-subject factors or their labels need
+#'   to be specified in the function call. If only one factor is 
+#'   present, it is assumed that this is a within-subject factor
+#'   (e.g. time).
 #'  
 #'  If subjects in different groups of the between-subject factor have the same id, they will 
 #'  not be identified as different subjects and thus it is erroneously assumed that their 
@@ -67,7 +73,8 @@
 #' @examples data(o2cons)
 #' \dontrun{
 #' oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-#'             subject = "Subject", no.subf = 2, iter = 1000, resampling = "Perm", CPU = 1)
+#'             subject = "Subject", no.subf = 2, iter = 1000,
+#'             resampling = "Perm")
 #' summary(oxy)
 #' plot(oxy, factor = "Group") 
 #'  
@@ -79,8 +86,9 @@
 #' data(EEG)
 
 #' EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
-#'                data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
-#'                iter = 1000,  alpha = 0.01, CPU = 4, seed = 987, dec = 2)
+#'                data = EEG, subject = "id", within = c("feature", "region"),
+#'                resampling = "WildBS",
+#'                iter = 1000,  alpha = 0.01, seed = 987, dec = 2)
 #' summary(EEG_model)
 #' }
 #' 
@@ -94,14 +102,14 @@
 #'  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
 #'  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
-#'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
-#'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
-#'   Doi: 10.1080/00273171.2018.1446320.
+#'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+#'  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+#'  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
+#'  Doi: 10.1080/00273171.2018.1446320.
 #'  
-#'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
-#'   R-package for the Analysis of General Factorial Designs. 
-#'   Journal of Statistical Software, 79(1), 1-18.
+#'  Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
+#'  R-package for the Analysis of General Factorial Designs. 
+#'  Journal of Statistical Software, 79(1), 1-18.
 #' 
 #'
 #' @importFrom graphics axis legend par plot title
@@ -115,20 +123,22 @@
 #' @export
 
 RM <- function(formula, data, subject,
-               no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm",
-               CPU, seed, CI.method = "t-quantile", dec = 3){
+               within, no.subf, iter = 10000, alpha = 0.05, resampling = "Perm",
+               para = FALSE, CPU, seed, CI.method = "t-quantile", dec = 3){
   
-   if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
-     stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
-   }
-    
+  if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
+    stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
+  }
+  
   if (!(CI.method %in% c("t-quantile", "resampling"))){
     stop("CI.method must be one of 't-quantile' or 'resampling'!")
   }
   
-  test1 <- hasArg(CPU)
-  if(!test1){
-    CPU <- parallel::detectCores()
+  if(para){
+    test1 <- hasArg(CPU)
+    if(!test1){
+      CPU <- parallel::detectCores()
+    }
   }
   
   test2 <- hasArg(seed)
@@ -139,213 +149,107 @@ RM <- function(formula, data, subject,
   input_list <- list(formula = formula, data = data,
                      subject = subject, 
                      iter = iter, alpha = alpha, resampling = resampling, seed = seed)
-  
-  dat <- model.frame(formula, data)
-  if (!(subject %in% names(data))){
-    stop("The subject variable is not found!")
-  }
-  subject <- data[, subject]
-  if (length(subject) != nrow(dat)){
-    stop("There are missing values in the data.")
-  }
-  
-  
-  dat2 <- data.frame(dat, subject = subject)
-  
-  nf <- ncol(dat) - 1
-  nadat <- names(dat)
-  nadat2 <- nadat[-1]
-  fl <- NA
-  for (aa in 1:nf) {
-    fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
-  }
-  levels <- list()
-  for (jj in 1:nf) {
-    levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
-  }
-  lev_names <- expand.grid(levels)
-  n.whole <- nf - no.subf
-  
-  # check that subjects are correctly labeled
-    if(nrow(data)/length(unique(subject)) != prod(fl[(n.whole+1):length(fl)])){
-      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of within-subject factor levels
-                  (", prod(fl[(n.whole+1):length(fl)]), ") does not equal the total number of observations (", nrow(data), ")."))
-    }
-  
-
-  if (nf == 1) {
-    # one-way layout
-    dat2 <- dat2[order(dat2[, 2]), ]
-    response <- dat2[, 1]
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(subject),
-                     .drop = F)$Measure
-    # contrast matrix
-    hypo <- diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)
-    WTS_out <- matrix(NA, ncol = 3, nrow = 1)
-    ATS_out <- matrix(NA, ncol = 4, nrow = 1)
-    WTPS_out <- matrix(NA, ncol= 2, nrow = 1)
-    rownames(WTS_out) <- fac_names
-    rownames(ATS_out) <- fac_names
-    rownames(WTPS_out) <- fac_names
-    results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, 
-                              alpha, resampling, seed, CI.method)
-    WTS_out[1,] <- round(results$WTS, dec)
-    ATS_out[1, ] <- round(results$ATS, dec)
-    WTPS_out[1, ] <- round(results$WTPS, dec)
-    mean_out <- round(results$Mean, dec)
-    Var_out <- round(results$Cov, dec)
-    CI <- round(results$CI, dec)
-    colnames(CI) <- c("CIl", "CIu")
-    descriptive <- cbind(lev_names, n, mean_out, CI)
-    colnames(descriptive) <- c(nadat2, "n", "Means",
-                               paste("Lower", 100 * (1 - alpha), "%", "CI"),
-                               paste("Upper", 100 * (1 - alpha), "%", "CI"))
-    
-    colnames(WTS_out) <- cbind ("Test statistic", "df",
-                                "p-value")
-    colnames(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
-    output <- list()
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$WTS <- WTS_out
-    output$ATS <- ATS_out
-    output$resampling <- WTPS_out
-    output$plotting <- list(levels, fac_names, nf)
-    names(output$plotting) <- c("levels", "fac_names", "nf")
-    # end one-way layout ------------------------------------------------------
-  } else {
-    # no. of whole-plot (groups) and sub-plot (sub) factors
-    dat2 <- dat2[do.call(order, dat2[, 2:(nf + 2)]), ]
-    lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
-    response <- dat2[, 1]
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    fac_names_original <- fac_names
-    perm_names <- t(attr(terms(formula), "factors")[-1, ])
-    gr <- nadat2[1]
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(subject),
-                     .drop = F)
-    n.groups <- prod(fl[1:n.whole])
-    n.sub <- prod(fl) / n.groups
-    nind <- n[1, ]
-    for (i in 1:(n.groups-1)){
-      nind[i+1, ] <- n[(n.sub * i) + 1, ]
-    }
-    if (n.whole == 1){
-    zzz <- unique(dat2[, gr])
-    nind <- nind[order(order(zzz)), ]$Measure
-    n <- rep(nind, each=n.sub)
-    } else {
-      nind <- nind$Measure
-      n <- n$Measure
-    }
-    # no factor combinations with less than 2 observations
-    if (0 %in% nind || 1 %in% nind) {
-      stop("There is at least one factor-level combination
-           with less than 2 observations!")
-    }
-    
-    # number of whole-plot factors and their interactions
-    tmp_whole <- 0
-    for (i in 1:n.whole) {
-      tmp_whole <- c(tmp_whole, choose(n.whole, i))
-      whole_count <- sum(tmp_whole)
-    }
-    if (n.whole == 0){
-      whole_count <- 0
-    }
-    
-    # number of hypotheses
-    tmp <- 0
-    for (i in 1:nf) {
-      tmp <- c(tmp, choose(nf, i))
-      nh <- sum(tmp)
-    }
-    if (length(fac_names) != nh) {
-      stop("Something is wrong: Perhaps a missing interaction term in formula?")
-    }
-    
-    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
-    fac_names <- HC(fl, perm_names, fac_names)[[2]]
-    
-    WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
-    ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
-    WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)
-    rownames(WTS_out) <- fac_names
-    rownames(ATS_out) <- fac_names
-    rownames(WTPS_out) <- fac_names
-    colnames(ATS_out) <- c("Test statistic", "df1", "df2", "p-value")
-    # calculate results
-    if (n.whole == 0 && nf !=1) {
-      for (i in 1:length(hypo_matrices)) {
-        results <- RM.Stat.sub(data = response, nind = nind[1], n, hypo_matrices[[i]],
-                               iter, alpha, n.sub, n.groups, resampling, seed, CI.method)
-        WTS_out[i, ] <- round(results$WTS, dec)
-        ATS_out[i, ] <- round(results$ATS, dec)
-        WTPS_out[i, ] <- round(results$WTPS, dec)
-      }
-    } else {  
-      for (i in 1:length(hypo_matrices)) {
-        results <- RM.Stat(data = response, nind, n, hypo_matrices[[i]],
-                           iter, alpha, iii = i, whole_count, n.sub, n.groups, 
-                           resampling, CPU, seed, CI.method)
-        WTS_out[i, ] <- round(results$WTS, dec)
-        ATS_out[i, ] <- round(results$ATS, dec)
-        WTPS_out[i, ] <- round(results$WTPS, dec)
-       # quant[i] <- results$quantile
-      }
-    }
-    mean_out <- round(results$Mean, dec)
-    Var_out <- round(results$Cov, dec)
-    CI <- round(results$CI, dec)
-    colnames(CI) <- c("CIl", "CIu")
-    descriptive <- cbind(lev_names, n, mean_out, CI)
-    colnames(descriptive) <- c(nadat2, "n", "Means",
-                               paste("Lower", 100 * (1 - alpha),"%", "CI"),
-                               paste("Upper", 100 * (1 - alpha),"%", "CI"))
-    
-    # calculate group means, variances and CIs ----------------------------
-    mu <- list()
-    sigma <- list()
-    n_groups <- list()
-    lower <- list()
-    upper <- list()
-    for (i in 1:nf) {
-      mu[[i]] <- c(by(dat2[, 1], dat2[, i + 1], mean))
-      sigma[[i]] <- c(by(dat2[, 1], dat2[, i + 1], var))
-      n_groups[[i]] <- c(by(dat2[, 1], dat2[, i + 1], length))
-      lower[[i]] <- mu[[i]] - sqrt(sigma[[i]] / n_groups[[i]]) *
-        qt(1 - alpha / 2, df = n_groups[[i]])
-      # HIER NUR t-QUANTIL
-      upper[[i]] <- mu[[i]] + sqrt(sigma[[i]] / n_groups[[i]]) *
-        qt(1 - alpha / 2, df = n_groups[[i]])
-    }
-    
-    # Determine names of within-subject factors for output
+  #----------------------------------------------------------------------------------#
+  # Determine names of within-subject factors if not given
+  test3 <- hasArg(within)
+  if(!test3){
     facs <- rownames(attr(terms(formula), "factors"))
-    within.facs <- facs[(length(facs)-no.subf+1):length(facs)]
-    
-    # Output ------------------------------------------------------
-    colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
-    output <- list()
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$WTS <- WTS_out
-    output$ATS <- ATS_out
-    output$resampling <- WTPS_out
-    output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper,
-                            fac_names_original, dat2, fl, alpha, nadat2, lev_names)
-    names(output$plotting) <- c("levels", "fac_names", "nf", "no.subf", "mu",
-                                "lower", "upper", "fac_names_original", "dat2", "fl",
-                                "alpha", "nadat2", "lev_names")
-    output$withinfactors <- within.facs
+    within <- facs[(length(facs)-no.subf+1):length(facs)]  
   }
+  
+  #----------------------------------------------------------------------------------#
+  # prepare data for the calculations
+  prepdt <- prepare.data(formula, data, subject, within)
+  # extract relevant info
+  EF <- prepdt[["EF"]]
+  nf <- prepdt[["nf"]]
+  fac_names_original <- prepdt[["fac_names_original"]]
+  no.whole <- prepdt[["no.whole"]]
+  lev.sub <- prepdt[["lev.sub"]]
+  hypo_matrices <- prepdt[["hypo"]]
+  fac_names <- prepdt[["fac"]]
+  Yw2 <- prepdt[["data"]]
+  nind <- prepdt[["n"]]
+  fl <- prepdt[["fl"]]
+  lev_names <- prepdt[["lev_names"]]
+  n <- rep(nind, each = lev.sub)
+  no.subf <- prepdt[["no.subf"]]
+  # number of whole-plot factors and their interactions
+  tmp_whole <- 0
+  for (i in 1:no.whole) {
+    tmp_whole <- c(tmp_whole, choose(no.whole, i))
+    whole_count <- sum(tmp_whole)
+  }
+  if (no.whole == 0){
+    whole_count <- 0
+  }
+  
+  #---------------------------------------------------------------------#  
+  WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
+  ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
+  WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)
+  rownames(WTS_out) <- fac_names
+  rownames(ATS_out) <- fac_names
+  rownames(WTPS_out) <- fac_names
+  colnames(ATS_out) <- c("Test statistic", "df1", "df2", "p-value")
+  colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
+  colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
+  
+  # calculate results
+  for (i in 1:length(hypo_matrices)) {
+    results <- RM.Stat(Y = Yw2, nind, hypo_matrices[[i]],
+                       iter, alpha, iii = i, whole_count, n.sub = lev.sub,
+                       resampling, para, CPU, seed, CI.method)
+    WTS_out[i, ] <- round(results$WTS, dec)
+    ATS_out[i, ] <- round(results$ATS, dec)
+    WTPS_out[i, ] <- round(results$WTPS, dec)
+  }
+  mean_out <- round(results$Mean, dec)
+  Var_out <- round(results$Cov, dec)
+  CI <- round(results$CI, dec)
+  colnames(CI) <- c("CIl", "CIu")
+  descriptive <- cbind(lev_names, n, mean_out, CI)
+  colnames(descriptive) <- c(EF, "n", "Means",
+                             paste("Lower", 100 * (1 - alpha),"%", "CI"),
+                             paste("Upper", 100 * (1 - alpha),"%", "CI"))
+  
+  # calculate group means, variances and CIs ----------------------------
+  mu <- list()
+  sigma <- list()
+  n_groups <- list()
+  lower <- list()
+  upper <- list()
+  dat2 <- prepdt[["dat2"]]
+  for (i in 1:nf) {
+    mu[[i]] <- c(by(dat2[, 1], dat2[, i + 1], mean))
+    sigma[[i]] <- c(by(dat2[, 1], dat2[, i + 1], var))
+    n_groups[[i]] <- c(by(dat2[, 1], dat2[, i + 1], length))
+    lower[[i]] <- mu[[i]] - sqrt(sigma[[i]] / n_groups[[i]]) *
+      qt(1 - alpha / 2, df = n_groups[[i]])
+    # HIER NUR t-QUANTIL
+    upper[[i]] <- mu[[i]] + sqrt(sigma[[i]] / n_groups[[i]]) *
+      qt(1 - alpha / 2, df = n_groups[[i]])
+  }
+  
+  # for output: make sure the right factors are determined 
+  # as within-subjects factors
+  facs <- rownames(attr(terms(formula), "factors"))
+  within_out <- facs[(length(facs)-no.subf+1):length(facs)] 
+  
+  # Output ------------------------------------------------------
+  output <- list()
+  output$input <- input_list
+  output$Descriptive <- descriptive
+  output$Covariance <- Var_out
+  output$WTS <- WTS_out
+  output$ATS <- ATS_out
+  output$resampling <- WTPS_out
+  output$plotting <- list(levels = prepdt[["levels"]], fac_names = fac_names,
+                          nf = nf, no.subf = no.subf, mu = mu, 
+                          lower = lower, upper = upper,
+                          fac_names_original = fac_names_original, dat2 = dat2, 
+                          fl = fl, alpha = alpha, nadat2 = EF, lev_names = lev_names)
+  output$withinfactors <- within_out
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

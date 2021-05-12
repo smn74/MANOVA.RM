@@ -5,8 +5,8 @@
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
 MANOVA.wide(formula, data, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE,
-  dec = 3, ...)
+  resampling = "paramBS", para = FALSE, CPU, seed,
+  nested.levels.unique = FALSE, dec = 3, ...)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -26,8 +26,10 @@ statistic. The default option is 10,000.}
 (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
 Rademacher weights). The Wild Bootstrap is calculated for all test statistics.}
 
-\item{CPU}{The number of cores used for parallel computing. If omitted, cores are
-detected via \code{\link[parallel]{detectCores}}.}
+\item{para}{If parallel computing should be used. Default is FALSE.}
+
+\item{CPU}{The number of cores used for parallel computing. If not specified, cores
+are detected via \code{\link[parallel]{detectCores}}.}
 
 \item{seed}{A random seed for the resampling procedure. If omitted, no 
 reproducible seed is set.}
@@ -67,7 +69,7 @@ rate     <- gl(2,10, labels = c("Low", "High"))
 additive <- gl(2, 5, length = 20, labels = c("Low", "High"))
 example <- data.frame(tear, gloss, opacity, rate, additive)
 fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, 
-data = example, iter = 100, CPU = 1)
+data = example, iter = 1000)
 summary(fit)
 
 }

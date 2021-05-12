@@ -1,3 +1,9 @@
+# MANOVA.RM 0.5.1
+* improve RM function such that
+  - no interaction term necessary
+  - within-subjects factor can be explicitely specified (instead of no.subf)
+* speed up computation time by removing parallel computing
+
 # MANOVA.RM 0.4.3
 * fix ordering of data for multRM
 * update documentation

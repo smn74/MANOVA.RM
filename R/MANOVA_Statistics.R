@@ -1,6 +1,6 @@
-time <- NULL
 ## function for calculating test statistics for MANOVA
-MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p, CPU, seed, nf){
+MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p,
+                       para, CPU, seed, nf){
   
   N <- sum(n)
   H <- hypo_matrix
@@ -36,96 +36,112 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   # MATS
   D <- diag(Sn)*diag(p*n.groups)
   Q_N <- N* t(means)%*%t(H)%*%MASS::ginv(H%*%D%*%t(H))%*%H%*%means
-
-   #--------------------------------- parametric bootstrap ---------------------------#
-   PBS <- function(i, ...){
-     # calculate mvrnorm for each group
-     XP <- list()
-     meansP <- list()
-     for (i in 1:n.groups){
-       XP[[i]] <- MASS::mvrnorm(n[i], mu = rep(0, p), Sigma = n[i]*V[[i]])
-       meansP[[i]] <- colMeans(XP[[i]])
-     }
-     meansP <- unlist(meansP)
   
-     VP <- list()
-     for(i in 1:n.groups){
-       VP[[i]] <- 1 / n[i] * cov(XP[[i]])
-     }
-  
-     sigma_hatP <- VP[[1]]
-     for (i in 2:n.groups){
-       sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
-     }
-     SnP <- N * sigma_hatP
-  
-     # WTS
-     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
-     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
-  
-     # MATS
-     DP <- diag(SnP)*diag(p*n.groups)
-     Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
-     pbs <- list(WTPS = WTPS, Q_N_P = Q_N_P, meansP = meansP, DP = DP)
-     return(pbs)
-   }
-  
-   #---------------------------------- Wild bootstrap ---------------------------------#
-   WBS <- function(i, ...){
-  
-     VP <- list(NA)
-     xperm <- list(NA)
-     meansP <- list()
-     for (i in 1:n.groups){
-       y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
-       epsi <- 2*rbinom(n[i], 1, 1/2)-1
-       xperm[[i]] <- epsi*(y - colMeans(y))
-       VP[[i]] <- 1 / n[i] * cov(xperm[[i]])
-       meansP[[i]] <- colMeans(xperm[[i]])
-     }
-     meansP <- unlist(meansP)
-  
-     sigma_hatP <- VP[[1]]
-     for (i in 2:n.groups){
-       sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
-     }
-     SnP <- N * sigma_hatP
-  
-     # WTS
-     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
-     WTPS <- N * t(meansP) %*% TP %*% meansP
-     # MATS
-     DP <- diag(SnP)*diag(p*n.groups)
-     Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
-     wbs <- list(WTPS = WTPS, Q_N_P = Q_N_P, meansP = meansP, DP = DP)
-     return(wbs)
-   }
-  
-  cl <- makeCluster(CPU)
-  
-  if(seed != 0){
-    parallel::clusterSetRNGStream(cl, iseed = seed)
-  }
-  if(resampling == "paramBS"){
-    bs_out <- parallel::parLapply(cl, 1:iter, PBS)
-  } else if(resampling == "WildBS"){
-    bs_out <- parallel::parLapply(cl, 1:iter, WBS)
+  #--------------------------------- parametric bootstrap ---------------------------#
+  PBS <- function(i, ...){
+    # calculate mvrnorm for each group
+    XP <- list()
+    meansP <- list()
+    for (i in 1:n.groups){
+      XP[[i]] <- MASS::mvrnorm(n[i], mu = rep(0, p), Sigma = n[i]*V[[i]])
+      meansP[[i]] <- colMeans(XP[[i]])
+    }
+    meansP <- unlist(meansP)
+    
+    VP <- list()
+    for(i in 1:n.groups){
+      VP[[i]] <- 1 / n[i] * cov(XP[[i]])
+    }
+    
+    sigma_hatP <- VP[[1]]
+    for (i in 2:n.groups){
+      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    }
+    SnP <- N * sigma_hatP
+    
+    # WTS
+    TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
+    WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
+    
+    # MATS
+    DP <- diag(SnP)*diag(p*n.groups)
+    Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
+    pbs <- list(WTPS = WTPS, Q_N_P = Q_N_P, meansP = meansP, DP = DP)
+    return(pbs)
   }
   
-  WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
-  MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
+  #---------------------------------- Wild bootstrap ---------------------------------#
+  WBS <- function(i, ...){
+    
+    VP <- list(NA)
+    xperm <- list(NA)
+    meansP <- list()
+    for (i in 1:n.groups){
+      y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
+      epsi <- 2*rbinom(n[i], 1, 1/2)-1
+      xperm[[i]] <- epsi*(y - colMeans(y))
+      VP[[i]] <- 1 / n[i] * cov(xperm[[i]])
+      meansP[[i]] <- colMeans(xperm[[i]])
+    }
+    meansP <- unlist(meansP)
+    
+    sigma_hatP <- VP[[1]]
+    for (i in 2:n.groups){
+      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
+    }
+    SnP <- N * sigma_hatP
+    
+    # WTS
+    TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
+    WTPS <- N * t(meansP) %*% TP %*% meansP
+    # MATS
+    DP <- diag(SnP)*diag(p*n.groups)
+    Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
+    wbs <- list(WTPS = WTPS, Q_N_P = Q_N_P, meansP = meansP, DP = DP)
+    return(wbs)
+  }
+  
+  if(para){
+    cl <- makeCluster(CPU)
+    
+    if(seed != 0){
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
+    if(resampling == "paramBS"){
+      bs_out <- parallel::parLapply(cl, 1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- parallel::parLapply(cl, 1:iter, WBS)
+    }
+    
+    WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
+    MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
+    BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
+    BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
+    parallel::stopCluster(cl)
+  } else {
+    if(seed != 0){
+      set.seed(seed)
+    }
+    if(resampling == "paramBS"){
+      bs_out <- lapply(1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- lapply(1:iter, WBS)
+    }
+    
+    WTPS <- sapply(bs_out, function(x) x$WTPS)
+    MATSbs <- sapply(bs_out, function(x) x$Q_N_P)
+    BSmeans <- lapply(bs_out, function(x) x$meansP)
+    BSVar <- lapply(bs_out, function(x) x$DP)
+  }
   ecdf_WTPS <- ecdf(WTPS)
   p_valueWTPS <- 1-ecdf_WTPS(WTS)
   ecdf_MATS <- ecdf(MATSbs)
   p_valueMATS <- 1 - ecdf_MATS(Q_N)
   
-  BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
-  BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
-  parallel::stopCluster(cl)
   
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
-
+  
   #--------------------- Quantiles -------------------------------#
   quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
   quant_MATS <- quantile(ecdf_MATS, 1-alpha)
@@ -136,7 +152,7 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   MATS_out <- Q_N
   WTPS_out <- c(p_valueWTPS, p_valueMATS)
   result <- list(WTS = WTS_out, WTPS = WTPS_out, MATS = MATS_out,
-                 Cov = Sn, Mean = means, time = time, quantiles = quantiles, BSmeans = BSmeans,
+                 Cov = Sn, Mean = means, quantiles = quantiles, BSmeans = BSmeans,
                  BSVar = BSVar)
   return(result)
 }
@@ -147,7 +163,8 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
 # for wide format data
 #######################
 
-MANOVA.Stat.wide <- function(Y, n, hypo_matrix, iter, alpha, resampling, CPU, seed, p){
+MANOVA.Stat.wide <- function(Y, n, hypo_matrix, iter, alpha, resampling,
+                             para, CPU, seed, p){
   
   N <- sum(n)
   H <- hypo_matrix
@@ -236,28 +253,44 @@ MANOVA.Stat.wide <- function(Y, n, hypo_matrix, iter, alpha, resampling, CPU, se
   }
   #-------------------------------------------------------------
   
-  
+  if(para){
   cl <- makeCluster(CPU)
   
-    if(seed != 0){
-      parallel::clusterSetRNGStream(cl, iseed = seed)
-    }
+  if(seed != 0){
+    parallel::clusterSetRNGStream(cl, iseed = seed)
+  }
   if(resampling == "paramBS"){
     bs_out <- parallel::parLapply(cl, 1:iter, PBS)
   } else if(resampling == "WildBS"){
     bs_out <- parallel::parLapply(cl, 1:iter, WBS)
   }
-    
-    WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
-    MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
-    ecdf_WTPS <- ecdf(WTPS)
-    p_valueWTPS <- 1-ecdf_WTPS(WTS)
-    ecdf_MATS <- ecdf(MATSbs)
-    p_valueMATS <- 1 - ecdf_MATS(Q_N)
   
-    BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
-    BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
+  WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
+  MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
+  BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
+  BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
   parallel::stopCluster(cl)
+  } else {
+    
+    if(seed != 0){
+      set.seed(seed)
+    }
+    if(resampling == "paramBS"){
+      bs_out <- lapply(1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- lapply(1:iter, WBS)
+    }
+    
+    WTPS <- sapply(bs_out, function(x) x$WTPS)
+    MATSbs <- sapply(bs_out, function(x) x$Q_N_P)
+    BSmeans <- lapply(bs_out, function(x) x$meansP)
+    BSVar <- lapply(bs_out, function(x) x$DP)
+  }
+  ecdf_WTPS <- ecdf(WTPS)
+  p_valueWTPS <- 1-ecdf_WTPS(WTS)
+  ecdf_MATS <- ecdf(MATSbs)
+  p_valueMATS <- 1 - ecdf_MATS(Q_N)
+  
   
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
@@ -271,7 +304,8 @@ MANOVA.Stat.wide <- function(Y, n, hypo_matrix, iter, alpha, resampling, CPU, se
   MATS_out <- Q_N
   WTPS_out <- c(p_valueWTPS, p_valueMATS)
   result <- list(WTS = WTS_out, WTPS = WTPS_out, MATS = MATS_out,
-                 Cov = Sn, Mean = means, time = time, quantiles = quantiles, BSmeans = BSmeans,
+                 Cov = Sn, Mean = means, quantiles = quantiles,
+                 BSmeans = BSmeans,
                  BSVar = BSVar)
   return(result)
 }
