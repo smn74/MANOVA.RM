@@ -1,6 +1,6 @@
 ## function for calculating test statistics, permutation etc for repeated measures
 RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, 
-                  resampling, CPU, seed, CI.method){
+                  resampling, para, CPU, seed, CI.method){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -22,10 +22,12 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   
   #---------------- useful matrices ---------------------#
    A <- diag(n.sub) %x% t(rep(1 / nind[1], nind[1]))
+   if(a != 1){
    for (ii in 2:length(nind)){
      B <- diag(n.sub) %x% t(rep(1 / nind[ii], nind[ii]))
      A <- magic::adiag(A, B)
    } 
+   }
   # -----------------------------------------------------#
   # WTS
   T <- t(H) %*% MASS::ginv(H %*% Sn %*% t(H)) %*% H
@@ -48,11 +50,17 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   
   #----------------------------Permutation --------------------------------#
   Perm <- function(arg, ...){
-    xperm <- sample(Y, replace = FALSE)
-    meansP <- sapply(xperm, colMeans)
-    meansP <- c(meansP)
+    x <- unlist(Y)
+    xperm <- sample(x, replace = FALSE)
+    meansP <- A %*% xperm
+    n.temp <- n.sub*cumsum(c(0, nind))
     
-    VP <- lapply(xperm, cov)
+    VP <- list()
+    for(i in 1:a){
+      yperm <- matrix(xperm[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
+      VP[[i]] <- cov(yperm)
+    }
+    
     sigma_hatP <- 1/nind[1]*VP[[1]]
     if(a != 1){
       for (i in 2:a){
@@ -133,7 +141,9 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
     return(wildbs)
   }
   
-  cl <- makeCluster(CPU)
+  if(para){
+    cl <- makeCluster(CPU)
+  
   if(seed != 0){
     parallel::clusterSetRNGStream(cl, iseed = seed)
   }
@@ -147,6 +157,20 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   }
   WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
   ATSbs <- parallel::parSapply(cl, bs_out, function(x) x$ATS_res)
+  parallel::stopCluster(cl)
+  } else {
+    set.seed(seed)
+    if(resampling == "Perm"){
+      bs_out <-lapply(1:iter, Perm)
+    } else if(resampling == "paramBS"){
+      bs_out <- lapply(1:iter, PBS)
+    } else if(resampling == "WildBS"){
+      bs_out <- lapply(1:iter, WBS)
+    }
+    WTPS <- sapply(bs_out, function(x) x$WTPS)
+    ATSbs <- sapply(bs_out, function(x) x$ATS_res)
+  }
+  
   ecdf_WTPS <- ecdf(WTPS)
   p_valueWTPS <- 1-ecdf_WTPS(WTS)
   if(!is.na(ATSbs[1])){
@@ -156,7 +180,7 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
     p_valueATS_res <- NA
   }
   
-  parallel::stopCluster(cl)
+  
   
   #------------------------ resampling quantile -------------------#
   quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
