@@ -13,7 +13,7 @@ Furthermore, different resampling approaches are provided in order to improve th
 small sample behavior of the test statistics. 
 The WTS requires non-singular covariance matrices. If the covariance matrix is singular, a warning is returned.
 
-For detailed explanations and examples, see also Friedrich, Konietschke and Pauly (2020).
+For detailed explanations and examples, see also Friedrich, Konietschke and Pauly (2019).
 
 ## Theoretical background
 
@@ -64,17 +64,20 @@ head(o2cons)
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
 
-* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
-variables of interest on the right hand side. An interaction term must be specified. The time variable must be the last factor in the formula.
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `no.subf`: The number of within-subject factors, default is 1.
+* `no.subf`: The number of within-subject factors, default is 1. Alternatively, the 
+within-subjects factors can be directly specified using `within`.
 * `iter`: The number of iterations for the resampling approach. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.
 * `resampling`: The resampling method, one of 'Perm', 'paramBS' or 'WildBS'. Default is
 set to 'Perm'.
-* `CPU`: The number of cores used for parallel computing. If omitted, cores are detected automatically.
-* `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
+* `para`: A logical indicating whether parallel computing should be used. Default is `FALSE`.
+* `CPU`: The number of cores used for parallel computing. If not specified, cores are detected automatically.
+* `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set. Note that the 
+random seeds for the parallel computing differ from those without parallelisation. Thus, to reproduce results
+obtained with MANOVA.RM version <0.5.1, argument `para` must be set to `TRUE`.
 * `CI.method`: The method for calculating the quantiles used for the confidence intervals, 
   either 't-quantile' (the default) or 'resampling' (based on quantile of the resampled WTS).
 * `dec`: The number of decimals the results should be rounded to. Default is 3.
@@ -82,7 +85,7 @@ set to 'Perm'.
 ```{r}
 model1 <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
              subject = "Subject", no.subf = 2, iter = 1000, 
-             resampling = "Perm", CPU = 1, seed = 1234)
+             resampling = "Perm", seed = 1234)
 summary(model1)
 ```
 
@@ -107,8 +110,9 @@ values: For brain rate we know that the values decrease with age and pathology, 
 ```{r}
 data(EEG)
 EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
-                     data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
-                     iter = 1000,  alpha = 0.01, CPU = 1, seed = 987)
+                data = EEG, subject = "id", within = c("feature", "region"), 
+                resampling = "WildBS",
+                iter = 1000,  alpha = 0.01, seed = 987)
 summary(EEG_model)
 ```
 
@@ -147,29 +151,21 @@ now in a multivariate setting with 6 measurements per patient and three crossed 
 some groups (e.g., only 2 male patients aged $<$ 70 were diagnosed with AD) we restrict our analyses to two factors at a time.
 The analysis of this example is shown below.
 
-The `MANOVA` function takes as arguments:
+The most important arguments of the `MANOVA` function are:
 
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `iter`: The number of iterations for the resampling procedure. Default value is 10,000.
-* `alpha`: The significance level, default is 0.05.
 * `resampling`: The resampling method, one of 'paramBS' and 'WildBS'. Default is
 set to 'paramBS'.
-* `CPU`: The number of cores used for parallel computing. If omitted, cores are detected automatically.
-* `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
-* `nested.levels.unique`: For nested designs only: A logical specifying whether the levels of the nested factor(s)
-   are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
-   factor are the same for each level of the main factor. For an example and more explanations
-   see the GFD package and the corresponding vignette.
-* `dec`: The number of decimals the results should be rounded to. Default is 3.
+* `nested.levels.unique`: For nested designs only: A logical specifying whether the levels of the nested factor(s) are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested factor are the same for each level of the main factor. For an example and more explanations see the GFD package and the corresponding vignette.
 
 ```{r}
 data(EEG)
 EEG_MANOVA <- MANOVA(resp ~ sex * diagnosis, 
                      data = EEG, subject = "id", resampling = "paramBS", 
-                     iter = 1000,  alpha = 0.01, CPU = 1, seed = 987)
+                     iter = 1000,  alpha = 0.01, seed = 987)
 summary(EEG_MANOVA)
 ```
 
@@ -192,7 +188,7 @@ rate     <- gl(2,10, labels = c("Low", "High"))
 additive <- gl(2, 5, length = 20, labels = c("Low", "High"))
 
 example <- data.frame(tear, gloss, opacity, rate, additive)
-fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, data = example, iter = 1000, CPU = 1)
+fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, data = example, iter = 1000)
 summary(fit)
 ```
 
@@ -215,7 +211,7 @@ As an example, we consider the data set `water` from the package `HSAUR3`. The d
 if (requireNamespace("HSAUR3", quietly = TRUE)) {
 library(HSAUR3)
 data(water)
-test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 1000, resampling = "paramBS", CPU = 1, seed = 123)
+test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 1000, resampling = "paramBS", seed = 123)
 summary(test)
 cr <- conf.reg(test)
 cr
@@ -263,8 +259,7 @@ Since the interaction hypothesis is not significant in the `EEG_MANOVA` example,
 
 A one-way layout using MANOVA.wide():
 ```{r}
-oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
-                      iter = 1000, CPU = 1)
+oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide, iter = 1000)
 # and a user-defined contrast matrix
 H <- as.matrix(cbind(rep(1, 5), -1*Matrix::Diagonal(5)))
 # user-specified comparison
@@ -277,20 +272,18 @@ An example is given below. We consider a one-way layout of the EEG data with inf
 
 ```{r}
 model_sex <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central, brainrate_frontal,
-                            complexity_temporal, complexity_central, complexity_frontal) ~ sex,
-                      data = EEGwide,
-                      iter = 1000, seed = 987, CPU = 1)
+                            complexity_temporal, complexity_central, complexity_frontal) ~ sex, data = EEGwide, iter = 1000, seed = 987)
 summary(model_sex)
 ```
 
 Since the global hypothesis is rejected at 5% level, we continue with the univariate calculations:
 ```{r}
-EEG1 <- MANOVA.wide(brainrate_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
-EEG2 <- MANOVA.wide(brainrate_central ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
-EEG3 <- MANOVA.wide(brainrate_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
-EEG4 <- MANOVA.wide(complexity_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
-EEG5 <- MANOVA.wide(complexity_central ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
-EEG6 <- MANOVA.wide(complexity_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987, CPU = 1)
+EEG1 <- MANOVA.wide(brainrate_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987)
+EEG2 <- MANOVA.wide(brainrate_central ~ sex, data = EEGwide, iter = 1000, seed = 987)
+EEG3 <- MANOVA.wide(brainrate_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987)
+EEG4 <- MANOVA.wide(complexity_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987)
+EEG5 <- MANOVA.wide(complexity_central ~ sex, data = EEGwide, iter = 1000, seed = 987)
+EEG6 <- MANOVA.wide(complexity_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987)
 ```
 Adjust for multiple testing using the parametric bootstrap MATS and Bonferroni adjustment:
 ```{r}
@@ -313,7 +306,7 @@ set.seed(123)
 curdies$dug2 <- curdies$dugesia + rnorm(36)
 
 # first possibility: MANOVA.wide
-fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 1000, nested.levels.unique = TRUE, seed = 123, CPU = 1)
+fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 1000, nested.levels.unique = TRUE, seed = 123)
 
 # second possibility: MANOVA (long format)
 dug <- c(curdies$dugesia, curdies$dug2)
@@ -321,8 +314,7 @@ season <- rep(curdies$season, 2)
 site <- rep(curdies$site, 2)
 curd <- data.frame(dug, season, site, subject = rep(1:36, 2))
 
-fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nested.levels.unique = TRUE, seed = 123, iter = 1000,
-               CPU = 1)
+fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nested.levels.unique = TRUE, seed = 123, iter = 1000)
 
 # comparison of results
 summary(fit1)
@@ -347,6 +339,7 @@ different groups of between-subject factors must have individual labels.
 * `alpha`: A number specifying the significance level; the default is 0.05.
 * `resampling`: The resampling method to be used, one of "paramBS" (parametric bootstrap
    approach) and "WildBS" (wild bootstrap approach with Rademacher weights).
+* `para`: Logical, indicating whether parallel computing should be used. Default is FALSE.
 * `CPU`: The number of cores used for parallel computing. If omitted, cores are
   detected automatically.
 * `seed`: A random seed for the resampling procedure. If omitted, no 
@@ -359,7 +352,7 @@ As an example, we again use the EEG dataset. This time, imagine we have two outc
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
-fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 200, CPU = 1)
+fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 1000)
 summary(fit)
 ```
 
