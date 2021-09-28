@@ -14,39 +14,45 @@ xaxt <- NULL
 #' 
 
 #' @export 
-plot.RM <- function (x, CI.info = FALSE, ...) {
+plot.RM <- function (x, CI.info = FALSE, old = TRUE, ...) {
   
   object <- x
   dots <- list(...)
   a <- object$plotting
   b <- object$Descriptive
   fac.names <- a$fac_names
-  exist <- hasArg(factor) 
   
-  if(length(fac.names) != 1){
-    if(!exist){
-      print("Please choose the factor you wish to plot (for interaction type something like group1:group2) and confirm by pressing 'Enter'")
-      Faktor <- scan("", what="character")
-      while(length(Faktor)==0){
-        print("Please enter the name of the factor you wish to plot!")
+  if(old){
+    exist <- hasArg(factor)
+    
+    if(length(fac.names) != 1){
+      if(!exist){
+        print("Please choose the factor you wish to plot (for interaction type something like group1:group2) and confirm by pressing 'Enter'")
         Faktor <- scan("", what="character")
+        while(length(Faktor)==0){
+          print("Please enter the name of the factor you wish to plot!")
+          Faktor <- scan("", what="character")
+        }
+      } else {
+        Faktor <- dots$factor
       }
     } else {
-      Faktor <- dots$factor
+      Faktor <- fac.names
     }
+    
+    match.arg(Faktor, fac.names)
+    h <- helper_old(a, b, Faktor)
   } else {
-    Faktor <- fac.names
+    Faktor <- fac.names[length(fac.names)]
+    h <- helper(a, b, Faktor)
   }
   
-  match.arg(Faktor, fac.names)
-  h <- helper(a, b, Faktor)
-  
   # to automatically create axis if not specified by user
-   exist2 <- hasArg(xaxt)
-   ax <- TRUE
-   if(exist2){
-     ax <- FALSE
-   }
+  exist2 <- hasArg(xaxt)
+  ax <- TRUE
+  if(exist2){
+    ax <- FALSE
+  }
   
   if(!(hasArg(gap))){
     gap <- 0.1
@@ -126,9 +132,9 @@ summary.MANOVA <- function (object, ...) {
   print(a$formula)
   
   if(!is.null(b$within)){
-  cat("A multivariate repeated measures analysis with ", b$no.subf, "within-subject factor(s) (", b$within, ")and ", b$no.whole,
-      "between-subject factor(s).", "\n")
-}
+    cat("A multivariate repeated measures analysis with ", b$no.subf, "within-subject factor(s) (", b$within, ")and ", b$no.whole,
+        "between-subject factor(s).", "\n")
+  }
   
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)

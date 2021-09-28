@@ -148,7 +148,8 @@ RM <- function(formula, data, subject,
   
   input_list <- list(formula = formula, data = data,
                      subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
+                     iter = iter, alpha = alpha, resampling = resampling, 
+                     seed = seed)
   #----------------------------------------------------------------------------------#
   # Determine names of within-subject factors if not given
   test3 <- hasArg(within)
@@ -193,7 +194,8 @@ RM <- function(formula, data, subject,
   rownames(WTPS_out) <- fac_names
   colnames(ATS_out) <- c("Test statistic", "df1", "df2", "p-value")
   colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
-  colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
+  colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, 
+                                                                "(ATS)"))
   
   # calculate results
   for (i in 1:length(hypo_matrices)) {
@@ -248,13 +250,15 @@ RM <- function(formula, data, subject,
                           nf = nf, no.subf = no.subf, mu = mu, 
                           lower = lower, upper = upper,
                           fac_names_original = fac_names_original, dat2 = dat2, 
-                          fl = fl, alpha = alpha, nadat2 = EF, lev_names = lev_names)
+                          fl = fl, alpha = alpha, nadat2 = EF,
+                          lev_names = lev_names)
   output$withinfactors <- within_out
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)
   if(!is.matrix(test)){
-    warning("The covariance matrix is singular. The WTS provides no valid test statistic!")
+    warning("The covariance matrix is singular. The WTS provides no valid 
+            test statistic!")
   }
   
   class(output) <- "RM"

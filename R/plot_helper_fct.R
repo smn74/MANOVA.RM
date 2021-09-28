@@ -28,53 +28,70 @@ helper <- function(plot.object, descr.object, factor, ...){
     alpha <- plot.object$alpha
     
     # main effects
-    if(factor %in% nadat2){
-      index <- which(factor == nadat2)
-      h$levels <- levels[[index]]
-      h$y <- matrix(mu[[index]], ncol = fl[index])
-      h$li <- lower[[index]]
-      h$ui <- upper[[index]]
-      h$xlab <- nadat2[index]
-      h$code <- "main"
-    }
+    # if(factor %in% nadat2){
+    #   index <- which(factor == nadat2)
+    #   h$levels <- levels[[index]]
+    #   h$y <- matrix(mu[[index]], ncol = fl[index])
+    #   h$li <- lower[[index]]
+    #   h$ui <- upper[[index]]
+    #   h$xlab <- nadat2[index]
+    #   h$code <- "main"
+    # }
     
     # two-way plots
-    fac_names_twofold <- plot.object$fac_names_original[ - (1:nf)]
-    fac_names_twofold <- fac_names_twofold[1:choose(nf, 2)]
+    #fac_names_twofold <- plot.object$fac_names_original[ - (1:nf)]
+    #fac_names_twofold <- fac_names_twofold[1:choose(nf, 2)]
     
-    if (factor %in% fac_names_twofold) {
-      fak1 <- Faktor[1]
-      fak2 <- Faktor[2]
-      posi <- which(fac_names_original[1:nf] == fak1)
-      posi2 <- which(fac_names_original[1:nf] == fak2)
-      
-      nmu <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)], mean),
-                    nrow = fl[posi])
-      rownames(nmu) <- levels[[posi]]
-      colnames(nmu) <- levels[[posi2]]
-      nsigma <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)], var),
-                       nrow = fl[posi])
-      nn_groups <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)],
-                             length), nrow = fl[posi])
-      nlower <- nmu - sqrt(nsigma/ nn_groups) *
-        qt(1 - alpha / 2, df = nn_groups)
-      rownames(nlower) <- levels[[posi]]
-      colnames(nlower) <- levels[[posi2]]
-      
-      nupper <- nmu + sqrt(nsigma / nn_groups) *
-        qt(1 - alpha / 2, df = nn_groups)
-      rownames(nupper) <- levels[[posi]]
-      colnames(nupper) <- levels[[posi2]]
-      
-      # output of helper function
+    #if(factor %in% fac_names_twofold && nf == 2){
+    if(nf == 2){
+      posi <- which(fac_names_original[1:nf] == Faktor[1])
+      posi2 <- which(fac_names_original[1:nf] == Faktor[2])
       h$levels <- levels[[posi2]]
-      h$y <- nmu
-      h$li <- nlower
-      h$ui <- nupper
+      h$y <- matrix(descr.object[, "Means"], ncol = length(levels[[posi2]]), 
+                    byrow = T)
+      h$li <- matrix(descr.object[, lo], ncol = length(levels[[posi2]]), 
+                     byrow = T)
+      h$ui <- matrix(descr.object[, up], ncol = length(levels[[posi2]]), 
+                      byrow = T)
       h$xlab <- fak2
       h$legend <- levels[[posi]]
       h$code <- "2way"
-    } else if (length(Faktor) == 3) {
+    }
+    
+    # if (factor %in% fac_names_twofold && nf != 2) {
+    #   fak1 <- Faktor[1]
+    #   fak2 <- Faktor[2]
+    #   posi <- which(fac_names_original[1:nf] == fak1)
+    #   posi2 <- which(fac_names_original[1:nf] == fak2)
+    #   
+    #   nmu <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)], mean),
+    #                 nrow = fl[posi])
+    #   rownames(nmu) <- levels[[posi]]
+    #   colnames(nmu) <- levels[[posi2]]
+    #   nsigma <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)], var),
+    #                    nrow = fl[posi])
+    #   nn_groups <- matrix(by(dat2[, 1], dat2[, c(fak1, fak2)],
+    #                          length), nrow = fl[posi])
+    #   nlower <- nmu - sqrt(nsigma/ nn_groups) *
+    #     qt(1 - alpha / 2, df = nn_groups)
+    #   rownames(nlower) <- levels[[posi]]
+    #   colnames(nlower) <- levels[[posi2]]
+    #   
+    #   nupper <- nmu + sqrt(nsigma / nn_groups) *
+    #     qt(1 - alpha / 2, df = nn_groups)
+    #   rownames(nupper) <- levels[[posi]]
+    #   colnames(nupper) <- levels[[posi2]]
+    #   
+    #   # output of helper function
+    #   h$levels <- levels[[posi2]]
+    #   h$y <- nmu
+    #   h$li <- nlower
+    #   h$ui <- nupper
+    #   h$xlab <- fak2
+    #   h$legend <- levels[[posi]]
+    #   h$code <- "2way"
+    # } else if (length(Faktor) == 3) {
+    if(nf == 3){
       # three-way plots
       fak1 <- Faktor[1]
       fak2 <- Faktor[2]
@@ -84,30 +101,30 @@ helper <- function(plot.object, descr.object, factor, ...){
       posi2 <- which(fac_names_original[1:nf] == fak2)
       posi3 <- which(fac_names_original[1:nf] == fak3)
       
-      if (nf == 3){          
+     # if (nf == 3){          
         mu3 <- matrix(descr.object$Means, ncol = fl[posi3], byrow = TRUE)
         lower3 <- matrix(descr.object[, lo], ncol = fl[posi3], byrow = TRUE) 
         upper3 <- matrix(descr.object[, up], ncol = fl[posi3], byrow = TRUE) 
-      } else {
+     # } else {
         # c(t(...)) to get correct order of factors, analogous to case above
-        mu3 <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)], mean),
-                          nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
-        nsigma <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)], var),
-                             nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
-        nn_groups <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)],
-                                   length), nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
-        lower3 <- mu3 - sqrt(nsigma/ nn_groups) *
-          qt(1 - alpha / 2, df = nn_groups)
-        upper3 <- mu3 + sqrt(nsigma / nn_groups) *
-          qt(1 - alpha / 2, df = nn_groups)          
-      }
-      rownames(mu3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
-      colnames(mu3) <- levels[[posi3]]
-      rownames(lower3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
-      colnames(lower3) <- levels[[posi3]]
-      rownames(upper3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
-      colnames(upper3) <- levels[[posi3]]
-      
+      #   mu3 <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)], mean),
+      #                     nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
+      #   nsigma <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)], var),
+      #                        nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
+      #   nn_groups <- matrix(c(t(matrix(by(dat2[, 1], dat2[, c(fak1, fak3, fak2)],
+      #                              length), nrow = fl[posi1]))), ncol=fl[posi3], byrow = TRUE)
+      #   lower3 <- mu3 - sqrt(nsigma/ nn_groups) *
+      #     qt(1 - alpha / 2, df = nn_groups)
+      #   upper3 <- mu3 + sqrt(nsigma / nn_groups) *
+      #     qt(1 - alpha / 2, df = nn_groups)          
+      # }
+       rownames(mu3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
+       colnames(mu3) <- levels[[posi3]]
+       rownames(lower3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
+       colnames(lower3) <- levels[[posi3]]
+       rownames(upper3) <- paste(rep(levels[[posi1]], each = length(levels[[posi2]])), levels[[posi2]])
+       colnames(upper3) <- levels[[posi3]]
+       
       # ouput
       h$levels <- levels
       h$y <- mu3   

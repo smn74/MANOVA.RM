@@ -1,5 +1,6 @@
 # still used for plotting via GUI
-plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...){
+plotting <- function(plot.object, descr.object, factor, col, pch, 
+                     legendpos, ...){
   
   nf <- plot.object$nf
   color <- col
@@ -11,8 +12,11 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
     ui <- descr.object[, 5]
     
     plotrix::plotCI(x = 1:xmax, y, li = li,
-                    ui = ui, xlim = c(0.8, length(plot.object$levels[[1]]) + 0.3), xaxt = "n", col = color[1], pch = pch[1], ...)
-    axis(side = 1, at = 1:1:length(plot.object$levels[[1]]), labels = plot.object$levels[[1]], ...)
+                    ui = ui, xlim = c(0.8,
+                                      length(plot.object$levels[[1]]) + 0.3),
+                    xaxt = "n", col = color[1], pch = pch[1], ...)
+    axis(side = 1, at = 1:1:length(plot.object$levels[[1]]),
+         labels = plot.object$levels[[1]], ...)
   } else {
        
     Faktor <- strsplit(factor, ":")[[1]]
@@ -35,9 +39,11 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
       for (i in 1:nf) {
         if (factor == nadat2[i]) {
           plotrix::plotCI(x = 1:length(levels[[i]]), mu[[i]],
-                          li = lower[[i]], ui = upper[[i]], xlim = c(0.8, length(levels[[i]]) + 0.3),
+                          li = lower[[i]], ui = upper[[i]], 
+                          xlim = c(0.8, length(levels[[i]]) + 0.3),
                           col = color[1], pch = pch[1], xaxt = "n", ...)
-          axis(side = 1, at = 1:1:length(levels[[i]]), labels = levels[[i]], ...)
+          axis(side = 1, at = 1:1:length(levels[[i]]),
+               labels = levels[[i]], ...)
         }
       }
       
@@ -74,7 +80,8 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
         for (i in 2:dim(nmu)[1]) {
           plotrix::plotCI(x = ((1:dim(nmu)[2]) + 0.07 * i),
                           nmu[i, ], li = nlower[i, ],
-                          ui = nupper[i, ], add = TRUE, col = color[i], pch = pch[1], ...)
+                          ui = nupper[i, ], add = TRUE, col = color[i],
+                          pch = pch[1], ...)
           
         }
         legend(legendpos, 
@@ -117,7 +124,8 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
         plotrix::plotCI(x = 1:fl[posi3],
                         mu3[1:fl[posi3]],
                         li = lower3[1:fl[posi3]],
-                        ui = upper3[1:fl[posi3]], xlim = c(0.8, (fl[posi3] + 0.3)),
+                        ui = upper3[1:fl[posi3]], 
+                        xlim = c(0.8, (fl[posi3] + 0.3)),
                         ylim = c(min(lower3) - 1, max(upper3) + 1),
                         col = color[1], pch = pch[1], xaxt = "n", ...)
         axis(side = 1, at = 1:1:fl[posi3], labels = levels[[posi3]], ...)
@@ -130,10 +138,13 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
           stopp <- fl[posi3]*(j+1)
           plotrix::plotCI(x = ((1:fl[posi3]) + delta[j+1]),
                           mu3[start:stopp], li = lower3[start:stopp],
-                          ui = upper3[start:stopp], add = TRUE, col = color2[j+1], pch = pch2[j+1], ...)
+                          ui = upper3[start:stopp], add = TRUE, 
+                          col = color2[j+1], pch = pch2[j+1], ...)
         }
         legend(legendpos, 
-               legend = c(fac_names_original[[posi1]], levels[[posi1]], fac_names_original[[posi2]], levels[[posi2]]), box.lty = 0,
+               legend = c(fac_names_original[[posi1]], levels[[posi1]],
+                          fac_names_original[[posi2]], levels[[posi2]]),
+               box.lty = 0,
                col = c(0, rep(1, fl[posi1]), 0, color[1:fl[posi2]]),
                pch = c(NA, pch[1:fl[posi1]], NA, rep(NA, fl[posi2])),
                seg.len = 0.5,
