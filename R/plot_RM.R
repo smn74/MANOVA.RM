@@ -46,7 +46,7 @@ RMplotting <- function(plot.object, descr.object, gap, ax, col, pch,
              ui = nupper[1, ],
              col = color[1], pch = pch[1],
              ...)
-    if(ax){axis(side = 1, at = 1:1:length(levels), labels = levels[[2]])}
+    if(ax){axis(side = 1, at = 1:1:length(levels[[2]]), labels = levels[[2]])}
     for(i in 2:nrow(y)){
       myplotci(x = (1:length(levels[[2]]))+gap*(i-1), y[i, ], li = nlower[i, ],
                ui = nupper[i, ], col = color[i], pch = pch[i], add = TRUE, ...)
