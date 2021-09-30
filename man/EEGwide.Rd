@@ -4,7 +4,8 @@
 \name{EEGwide}
 \alias{EEGwide}
 \title{EEG Measurements in Patients with Alzheimer's Disease (wide format)}
-\format{A data frame with 160 rows and 9 variables:
+\format{
+A data frame with 160 rows and 9 variables:
 \describe{
   \item{brainrate_temporal}{EEG measurements for brainrate in temporal regions}
   \item{brainrate_frontal}{EEG measurements for brainrate in frontal regions}
@@ -16,7 +17,8 @@
   \item{age}{age of the patient}
   \item{diagnosis}{neuropsychological diagnosis, AD for Alzheimer's Disease, MCI for mild cognitive impairment or SCC for subjective cognitive complaints without clinically significant deficits}
   \item{AgeGroup}{categorized age, coded as 0 for less than 70 years and 1 for \eqn{>= 70} years}
-}}
+}
+}
 \source{
 Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 

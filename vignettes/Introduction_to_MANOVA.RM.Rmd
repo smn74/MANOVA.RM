@@ -120,18 +120,20 @@ We find significant effects at level $\alpha = 0.01$ of the between-subject fact
 
 ### Plotting
 
-The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals based on a $t$-approximation.
-The `plot` function takes an `RM` object as an argument. In addition, the factor of interest may be specified. If this argument is 
-omitted in a two- or higher-way layout, the user is asked to specify the factor for plotting. Furthermore, additional graphical parameters
-can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
+The `RM()` function is equipped with a plotting option, displaying the calculated means along with the $(1-\alpha)$ confidence intervals.
+The `plot` function takes an `RM` object as an argument. Furthermore, additional graphical parameters can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
 
 ```{r}
-plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
-plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
-plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.05)
+plot(model1, leg = FALSE)
 ```
 
+For illustration purposes, we reduce the EEG-model above to a two-way design:
 
+```{r}
+EEGnew <- EEG[EEG$region == "temporal", ]
+EEG_model2 <- RM(resp ~ sex*feature, within = "feature", no.subf = 1, subject = "id", data = EEGnew)
+plot(EEG_model2, legendpos = "topleft", col = c(4, 2))
+```
 
 ## The `MANOVA` function
 
@@ -378,9 +380,8 @@ data frame and the resampling method.
 Additionally, one can specify whether or not headers are
 included in the data file, and which separator (e.g., ',' for *.csv files) and character symbols are used for decimals
 in the data file. 
-The GUI for `RM` also provides a plotting option, which generates a new window
-for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
-parameters.
+<!-- The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
+parameters. -->
 For the `multRM()` function there is no GUI available yet.
 
 ## References

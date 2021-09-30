@@ -4,8 +4,17 @@
 \alias{simCI}
 \title{Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts in multivariate factorial designs}
 \usage{
-simCI(object, contrast, contmat = NULL, type = NULL, base = 1,
-  interaction = TRUE, factor = NA, silent = FALSE, ...)
+simCI(
+  object,
+  contrast,
+  contmat = NULL,
+  type = NULL,
+  base = 1,
+  interaction = TRUE,
+  factor = NA,
+  silent = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{MANOVA} object.}

@@ -4,21 +4,16 @@
 \alias{plot.RM}
 \title{Plot function for an RM object}
 \usage{
-\method{plot}{RM}(x, CI.info = FALSE, ...)
+\method{plot}{RM}(x, leg = TRUE, ...)
 }
 \arguments{
 \item{x}{An object of class \code{RM}}
 
-\item{CI.info}{If CI.info = TRUE, the mean values and confidence limits of the considered
-contrast are printed.}
+\item{leg}{Logical: Should a legend be plotted?}
 
 \item{...}{Additional parameters to be passed to plot()}
 }
 \description{
-Generic plot function for \code{RM} objects: Returns a plot of the mean values along with confidence 
-intervals for a factor (combination) specified by the user.
-}
-\details{
-An additional argument \code{factor} can be used to specify the factor(s) used for plotting in two- and higher-way
-layouts. See the examples for details.
+Generic plot function for \code{RM} objects: Returns a plot of the mean 
+values along with confidence intervals for a specified RM-model.
 }

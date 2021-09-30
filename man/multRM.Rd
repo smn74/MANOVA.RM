@@ -4,8 +4,19 @@
 \alias{multRM}
 \title{Tests for Repeated Measures in Multivariate Semi-Parametric Factorial Designs}
 \usage{
-multRM(formula, data, subject, within, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", para = FALSE, CPU, seed, dec = 3)
+multRM(
+  formula,
+  data,
+  subject,
+  within,
+  iter = 10000,
+  alpha = 0.05,
+  resampling = "paramBS",
+  para = FALSE,
+  CPU,
+  seed,
+  dec = 3
+)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side

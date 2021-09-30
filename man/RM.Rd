@@ -4,9 +4,21 @@
 \alias{RM}
 \title{Tests for Repeated Measures in Semi-Parametric Factorial Designs}
 \usage{
-RM(formula, data, subject, within, no.subf, iter = 10000, alpha = 0.05,
-  resampling = "Perm", para = FALSE, CPU, seed,
-  CI.method = "t-quantile", dec = 3)
+RM(
+  formula,
+  data,
+  subject,
+  within,
+  no.subf,
+  iter = 10000,
+  alpha = 0.05,
+  resampling = "Perm",
+  para = FALSE,
+  CPU,
+  seed,
+  CI.method = "t-quantile",
+  dec = 3
+)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side

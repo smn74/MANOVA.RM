@@ -4,7 +4,8 @@
 \name{EEG}
 \alias{EEG}
 \title{EEG Measurements in Patients with Alzheimer's Disease (long format)}
-\format{A data frame with 960 rows and 7 variables:
+\format{
+A data frame with 960 rows and 7 variables:
 \describe{
   \item{resp}{EEG measurements}
   \item{sex}{sex of the patient}
@@ -13,7 +14,8 @@
   \item{region}{brain region of the EEG measurements, one of "temporal", "frontal" and "central"}
   \item{feature}{feature of the EEG measurements, either "brainrate" or "complexity"}
   \item{id}{Subject id}
-}}
+}
+}
 \source{
 Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 

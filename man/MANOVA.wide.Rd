@@ -4,9 +4,19 @@
 \alias{MANOVA.wide}
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
-MANOVA.wide(formula, data, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", para = FALSE, CPU, seed,
-  nested.levels.unique = FALSE, dec = 3, ...)
+MANOVA.wide(
+  formula,
+  data,
+  iter = 10000,
+  alpha = 0.05,
+  resampling = "paramBS",
+  para = FALSE,
+  CPU,
+  seed,
+  nested.levels.unique = FALSE,
+  dec = 3,
+  ...
+)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -58,7 +68,7 @@ restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
 }
 
 \examples{
-#Example on producing plastic film from Krzanowski (1998, p. 381), see \\code{\\link{manova.summary}}
+#Example on producing plastic film from Krzanowski (1998, p. 381), see \code{\link{manova.summary}}
 tear <- c(6.5, 6.2, 5.8, 6.5, 6.5, 6.9, 7.2, 6.9, 6.1, 6.3,
           6.7, 6.6, 7.2, 7.1, 6.8, 7.1, 7.0, 7.2, 7.5, 7.6)
 gloss <- c(9.5, 9.9, 9.6, 9.6, 9.2, 9.1, 10.0, 9.9, 9.5, 9.4,

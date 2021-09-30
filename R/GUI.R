@@ -38,7 +38,7 @@ GUI.RM <- function() {
     the.subf <- as.numeric(filename4$getText())
     the.subject <- filename5$getText()
     the.res <- c("Perm","paramBS", "WildBS")[comboboxresampling$active+1]
-    the.plot <- toPlot$active
+   #the.plot <- toPlot$active
     the.sep <- sepEntry$getText()
     the.headers <- headersEntry$active
     the.dec <- decEntry$getText()
@@ -51,161 +51,94 @@ GUI.RM <- function() {
     summary(res)
     
 ##########################################################
-    if (the.plot == TRUE && factornumber != 1) {
-      calculateGUIplot <- function() {
-        requireNamespace("RGtk2", quietly = TRUE)
-        plots <- function(button, user.data) {
-          error <- NULL
-          error1 <- NULL
-          Faktor <- filename$getText()
-          Title <- filename2$getText()
-          line_width <- as.numeric(filename3$getText())
-          the.legendpos <- filename4$getText()
-          
-          plotting(res$plotting, res$Descriptive, Faktor, main = Title, lwd = line_width, 
-                   col = 1:length(res$Descriptive[, 1]), pch = 1, legendpos = the.legendpos,
-                   ylab = "Means", xlab = "")
-          
-          
-          if (!is.null(error1)) {
-            hbox <- RGtk2::gtkHBoxNew()
-            vbox$packStart(hbox, FALSE, FALSE, 0)
-            label <- RGtk2::gtkLabel(error1)
-            hbox$packStart(label, FALSE, FALSE, 0)
-          }
-          if (!is.null(error)) {
-            hbox <- RGtk2::gtkHBoxNew()
-            vbox$packStart(hbox, FALSE, FALSE, 0)
-            label <- RGtk2::gtkLabel(error)
-            hbox$packStart(label, FALSE, FALSE, 0)
-          }
-        }
-        # Create window
-        window <- RGtk2::gtkWindow()
-        # Add title
-        window["title"] <- "Plot"
-        # Add a frame
-        frame <- RGtk2::gtkFrameNew("Please choose the factor you wish to plot (for interaction type something like group1:group2).")
-        window$add(frame)
-        # Create vertical container for file name entry
-        vbox <- RGtk2::gtkVBoxNew(FALSE, 8)
-        vbox$setBorderWidth(24)
-        frame$add(vbox)
-        # Add horizontal container for every widget line
-        hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
-        vbox$packStart(hbox, FALSE, FALSE, 0)
-        # Add label in first column
-        label <- RGtk2::gtkLabelNewWithMnemonic("_Factor")
-        hbox$packStart(label, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename"
-        filename <- RGtk2::gtkEntryNew()
-        filename$setWidthChars(50)
-        label$setMnemonicWidget(filename)
-        hbox$packStart(filename, FALSE, FALSE, 0)
-        # Add an horizontal container to specify parameters
-        hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
-        vbox$packStart(hbox, FALSE, FALSE, 0)
-        label2 <- RGtk2::gtkLabelNewWithMnemonic("_Title")
-        hbox$packStart(label2, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename2"
-        filename2 <- RGtk2::gtkEntryNew()
-        filename2$setWidthChars(10)
-        label2$setMnemonicWidget(filename2)
-        hbox$packStart(filename2, FALSE, FALSE, 0)
-        label3 <- RGtk2::gtkLabelNewWithMnemonic("_lwd")
-        hbox$packStart(label3, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename3"
-        filename3 <- RGtk2::gtkEntryNew()
-        filename3$setWidthChars(10)
-        filename3$setText(2)
-        label3$setMnemonicWidget(filename3)
-        hbox$packStart(filename3, FALSE, FALSE, 0)
-        label4 <- RGtk2::gtkLabelNewWithMnemonic("_position of legend")
-        hbox$packStart(label4, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename4"
-        filename4 <- RGtk2::gtkEntryNew()
-        filename4$setWidthChars(20)
-        filename4$setText("topright")
-        label4$setMnemonicWidget(filename4)
-        hbox$packStart(filename4, FALSE, FALSE, 0)
-        # Add button
-        the.buttons <- RGtk2::gtkHButtonBoxNew()
-        the.buttons$setBorderWidth(5)
-        vbox$add(the.buttons)
-        the.buttons$setLayout("spread")
-        the.buttons$setSpacing(40)
-        buttonOK <- RGtk2::gtkButtonNewFromStock("gtk-ok")
-        RGtk2::gSignalConnect(buttonOK, "clicked", plots)
-        the.buttons$packStart(buttonOK, fill=F)
-        buttonCancel <- RGtk2::gtkButtonNewFromStock("gtk-close")
-        RGtk2::gSignalConnect(buttonCancel, "clicked", window$destroy)
-        the.buttons$packStart(buttonCancel, fill=F)
-      }
-      calculateGUIplot()
-    } else if (the.plot == TRUE && factornumber == 1){
-      #### one-way
-      GUIplotOneWay <- function() {
-        plot.oneway <- function(button, user.data) {
-          error <- NULL
-          Title <- filename2$getText()
-          line_width <- as.numeric(filename3$getText())
-          Faktor <- test$fac_names
-          if (!is.null(error)) {
-            hbox <- RGtk2::gtkHBoxNew()
-            vbox$packStart(hbox, FALSE, FALSE, 0)
-            label <- RGtk2::gtkLabel(error)
-            hbox$packStart(label, FALSE, FALSE, 0)
-          }
-          plotting(res$plotting, res$Descriptive, Faktor, main = Title, lwd = line_width, 
-                   col = 1, pch = 1, ylab = "Means", xlab = Faktor)
-        }
-        # Create window
-        window <- RGtk2::gtkWindow()
-        # Add title
-        window["title"] <- "Plot"
-        # Add a frame
-        frame <- RGtk2::gtkFrameNew("Please choose the parameters for your plot.")
-        window$add(frame)
-        # Create vertical container for file name entry
-        vbox <- RGtk2::gtkVBoxNew(FALSE, 8)
-        vbox$setBorderWidth(24)
-        frame$add(vbox)
-        # Add horizontal container for every widget line
-        hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
-        vbox$packStart(hbox, FALSE, FALSE, 0)
-        # Add an horizontal container to specify parameters
-        hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
-        vbox$packStart(hbox, FALSE, FALSE, 0)
-        label2 <- RGtk2::gtkLabelNewWithMnemonic("_Title")
-        hbox$packStart(label2, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename2"
-        filename2 <- RGtk2::gtkEntryNew()
-        filename2$setWidthChars(10)
-        label2$setMnemonicWidget(filename2)
-        hbox$packStart(filename2, FALSE, FALSE, 0)
-        label3 <- RGtk2::gtkLabelNewWithMnemonic("_lwd")
-        hbox$packStart(label3, FALSE, FALSE, 0)
-        # Add entry in the second column; named "filename3"
-        filename3 <- RGtk2::gtkEntryNew()
-        filename3$setWidthChars(10)
-        filename3$setText(2)
-        label3$setMnemonicWidget(filename3)
-        hbox$packStart(filename3, FALSE, FALSE, 0)
-        # Add button
-        the.buttons <- RGtk2::gtkHButtonBoxNew()
-        the.buttons$setBorderWidth(5)
-        vbox$add(the.buttons)
-        the.buttons$setLayout("spread")
-        the.buttons$setSpacing(40)
-        buttonOK <- RGtk2::gtkButtonNewFromStock("gtk-ok")
-        RGtk2::gSignalConnect(buttonOK, "clicked", plot.oneway)
-        the.buttons$packStart(buttonOK,fill=F)
-        buttonCancel <- RGtk2::gtkButtonNewFromStock("gtk-close")
-        RGtk2::gSignalConnect(buttonCancel, "clicked", window$destroy)
-        the.buttons$packStart(buttonCancel, fill=F)
-      }
-      GUIplotOneWay()
-    }
+    # if (the.plot == TRUE){
+    #   #### one-way
+    #   GUIplotOneWay <- function() {
+    #     plot.oneway <- function(button, user.data) {
+    #       error <- NULL
+    #       Title <- filename2$getText()
+    #       line_width <- as.numeric(filename3$getText())
+    #       the.legendpos <- filename4$getText()
+    #      # Faktor <- test$fac_names
+    #       if (!is.null(error)) {
+    #         hbox <- RGtk2::gtkHBoxNew()
+    #         vbox$packStart(hbox, FALSE, FALSE, 0)
+    #         label <- RGtk2::gtkLabel(error)
+    #         hbox$packStart(label, FALSE, FALSE, 0)
+    #       }
+    #       a <- res$plotting
+    #       b <- res$Descriptive
+    #       label.x <- names(a$fl[nf])
+    #       sum.fac <- sum(a$fl)
+    #       xmax <- a$fl[nf]+ (sum.fac-a$fl[nf])*0.1
+    #       miny <- min(b$`Lower 95 % CI`)
+    #       maxy <- max(b$`Upper 95 % CI`)
+    #       
+    #       RMplotting(a, b, main = Title,
+    #                  lwd = line_width, ylab = "Means", xlab = label.x,
+    #                  col = 1:(sum.fac-a$fl[nf]),
+    #                  pch = 1:18, legendpos = the.legendpos,
+    #                  xlim = c(0.8, xmax + 0.1),
+    #                  ylim =c(miny, maxy), gap = 0.1, xaxt = "n",
+    #                  ax = FALSE,
+    #                  leg = TRUE, leg.cex = 0.5)
+    #     }
+    #     # Create window
+    #     window <- RGtk2::gtkWindow()
+    #     # Add title
+    #     window["title"] <- "Plot"
+    #     # Add a frame
+    #     frame <- RGtk2::gtkFrameNew("Please choose the parameters for your plot.")
+    #     window$add(frame)
+    #     # Create vertical container for file name entry
+    #     vbox <- RGtk2::gtkVBoxNew(FALSE, 8)
+    #     vbox$setBorderWidth(24)
+    #     frame$add(vbox)
+    #     # Add horizontal container for every widget line
+    #     hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
+    #     vbox$packStart(hbox, FALSE, FALSE, 0)
+    #     # Add an horizontal container to specify parameters
+    #     hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
+    #     vbox$packStart(hbox, FALSE, FALSE, 0)
+    #     label2 <- RGtk2::gtkLabelNewWithMnemonic("_Title")
+    #     hbox$packStart(label2, FALSE, FALSE, 0)
+    #     # Add entry in the second column; named "filename2"
+    #     filename2 <- RGtk2::gtkEntryNew()
+    #     filename2$setWidthChars(10)
+    #     label2$setMnemonicWidget(filename2)
+    #     hbox$packStart(filename2, FALSE, FALSE, 0)
+    #     label3 <- RGtk2::gtkLabelNewWithMnemonic("_lwd")
+    #     hbox$packStart(label3, FALSE, FALSE, 0)
+    #     # Add entry in the second column; named "filename3"
+    #     filename3 <- RGtk2::gtkEntryNew()
+    #     filename3$setWidthChars(10)
+    #     filename3$setText(2)
+    #     label3$setMnemonicWidget(filename3)
+    #     hbox$packStart(filename3, FALSE, FALSE, 0)
+    #     # legend position
+    #     label4 <- RGtk2::gtkLabelNewWithMnemonic("_position of legend")
+    #       hbox$packStart(label4, FALSE, FALSE, 0)
+    #       # Add entry in the second column; named "filename4"
+    #       filename4 <- RGtk2::gtkEntryNew()
+    #       filename4$setWidthChars(20)
+    #       filename4$setText("topright")
+    #       label4$setMnemonicWidget(filename4)
+    #       hbox$packStart(filename4, FALSE, FALSE, 0)
+    #     # Add button
+    #     the.buttons <- RGtk2::gtkHButtonBoxNew()
+    #     the.buttons$setBorderWidth(5)
+    #     vbox$add(the.buttons)
+    #     the.buttons$setLayout("spread")
+    #     the.buttons$setSpacing(40)
+    #     buttonOK <- RGtk2::gtkButtonNewFromStock("gtk-ok")
+    #     RGtk2::gSignalConnect(buttonOK, "clicked", plot.oneway)
+    #     the.buttons$packStart(buttonOK,fill=F)
+    #     buttonCancel <- RGtk2::gtkButtonNewFromStock("gtk-close")
+    #     RGtk2::gSignalConnect(buttonCancel, "clicked", window$destroy)
+    #     the.buttons$packStart(buttonCancel, fill=F)
+    #   }
+    #   GUIplotOneWay()
+    # }
 #####################################################################################################    
     
   }
@@ -316,12 +249,12 @@ hbox$packStart(comboboxresampling)
   # Add separator
   vbox$packStart(RGtk2::gtkHSeparatorNew(), FALSE, FALSE, 0)
   # Add plot-option
-  hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
-  vbox$packStart(hbox, FALSE, FALSE, 0)
-  label <- RGtk2::gtkLabelNewWithMnemonic("Plot _Results?")
-  hbox$packStart(label, FALSE, FALSE, 0)
-  toPlot <- RGtk2::gtkCheckButton()
-  hbox$packStart(toPlot, FALSE, FALSE, 0)
+  # hbox <- RGtk2::gtkHBoxNew(FALSE, 8)
+  # vbox$packStart(hbox, FALSE, FALSE, 0)
+  # label <- RGtk2::gtkLabelNewWithMnemonic("Plot _Results?")
+  # hbox$packStart(label, FALSE, FALSE, 0)
+  # toPlot <- RGtk2::gtkCheckButton()
+  # hbox$packStart(toPlot, FALSE, FALSE, 0)
   # Add button
   the.buttons <- RGtk2::gtkHButtonBoxNew()
   the.buttons$setBorderWidth(5)

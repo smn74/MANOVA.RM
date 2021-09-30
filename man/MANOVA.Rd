@@ -4,9 +4,19 @@
 \alias{MANOVA}
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
-MANOVA(formula, data, subject, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", para = FALSE, CPU, seed,
-  nested.levels.unique = FALSE, dec = 3)
+MANOVA(
+  formula,
+  data,
+  subject,
+  iter = 10000,
+  alpha = 0.05,
+  resampling = "paramBS",
+  para = FALSE,
+  CPU,
+  seed,
+  nested.levels.unique = FALSE,
+  dec = 3
+)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 

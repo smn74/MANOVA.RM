@@ -1,52 +1,22 @@
 xaxt <- NULL
 #' Plot function for an RM object
 #' 
-#' Generic plot function for \code{RM} objects: Returns a plot of the mean values along with confidence 
-#' intervals for a factor (combination) specified by the user.
+#' Generic plot function for \code{RM} objects: Returns a plot of the mean 
+#' values along with confidence intervals for a specified RM-model.
 #' 
 #' @param x An object of class \code{RM}
-#' @param CI.info If CI.info = TRUE, the mean values and confidence limits of the considered
-#' contrast are printed.
+#' @param leg Logical: Should a legend be plotted?
 #' @param ... Additional parameters to be passed to plot()
-#' 
-#' @details An additional argument \code{factor} can be used to specify the factor(s) used for plotting in two- and higher-way
-#' layouts. See the examples for details.
 #' 
 
 #' @export 
-plot.RM <- function (x, CI.info = FALSE, old = TRUE, ...) {
+plot.RM <- function (x, leg = TRUE, ...) {
   
   object <- x
   dots <- list(...)
   a <- object$plotting
   b <- object$Descriptive
-  fac.names <- a$fac_names
-  
-  if(old){
-    exist <- hasArg(factor)
-    
-    if(length(fac.names) != 1){
-      if(!exist){
-        print("Please choose the factor you wish to plot (for interaction type something like group1:group2) and confirm by pressing 'Enter'")
-        Faktor <- scan("", what="character")
-        while(length(Faktor)==0){
-          print("Please enter the name of the factor you wish to plot!")
-          Faktor <- scan("", what="character")
-        }
-      } else {
-        Faktor <- dots$factor
-      }
-    } else {
-      Faktor <- fac.names
-    }
-    
-    match.arg(Faktor, fac.names)
-    h <- helper_old(a, b, Faktor)
-  } else {
-    Faktor <- fac.names[length(fac.names)]
-    h <- helper(a, b, Faktor)
-  }
-  
+  nf <- a$nf
   # to automatically create axis if not specified by user
   exist2 <- hasArg(xaxt)
   ax <- TRUE
@@ -60,24 +30,23 @@ plot.RM <- function (x, CI.info = FALSE, old = TRUE, ...) {
     gap <- dots$gap
   }
   
-  xmax <- ncol(h$y)+ nrow(h$y)*gap
+  label.x <- names(a$fl[nf])
+  sum.fac <- sum(a$fl)
+  xmax <- a$fl[nf]+ (sum.fac-a$fl[nf])*gap
+  miny <- min(b$`Lower 95 % CI`)
+  maxy <- max(b$`Upper 95 % CI`)
   # default values
-  args <- list(h,
-               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(h$legend),
-               pch = 1:18, legendpos = "topright", xlim = c(0.8, xmax + 0.1),
-               ylim =c(min(h$li), max(h$ui)), gap = 0.1, xaxt = "n", ax)
+  args <- list(a,
+               b,
+               lwd = 2, ylab = "Means", xlab = label.x,
+               col = 1:(sum.fac-a$fl[nf]),
+               pch = 1:18, legendpos = "topright",
+               xlim = c(0.8, xmax + 0.1),
+               ylim =c(miny, maxy), gap = 0.1, xaxt = "n", ax,
+               leg, leg.cex = 0.5)
   
   args[names(dots)] <- dots
-  do.call(newplotting, args = args)
-  
-  if (CI.info == TRUE){
-    CI.out <- list()
-    CI.out$mean <- h$y
-    CI.out$lower <- h$li
-    CI.out$upper <- h$ui
-    return(CI.out)
-  }
-  
+  do.call(RMplotting, args = args)
 }
 
 #' Display MANOVA object

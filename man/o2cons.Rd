@@ -4,14 +4,16 @@
 \name{o2cons}
 \alias{o2cons}
 \title{Oxygen Consumption of Leukocytes}
-\format{A data frame with 144 rows and 5 variables:
+\format{
+A data frame with 144 rows and 5 variables:
 \describe{
   \item{O2}{oxygen consumption of leukocytes in \eqn{\mu}l}
   \item{Staphylococci}{whether or not inactivated staphylococci were added, 1 denotes yes, 0 no}
   \item{Time}{the measurements were taken after 6, 12 and 18 minutes}
   \item{Group}{the treatment group, either P for Placebo or V for Verum}
   \item{Subject}{the subject id}
-}}
+}
+}
 \source{
 Friedrich, S., Brunner, E. & Pauly, M. (2017). 
 Permuting longitudinal data in spite of the dependencies. 
