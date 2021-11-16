@@ -8,8 +8,8 @@ dat <- model.frame(formula, data)
 if (!(subject %in% names(data))){
   stop("The subject variable is not found!")
 }
-subject <- data[, subject]
-if (length(subject) != nrow(dat)){
+subject <- data[[subject]]
+if (length(subject) != nrow(dat) && nrow(subject)!= nrow(data)){
   stop("There are missing values in the data.")
 }
 
