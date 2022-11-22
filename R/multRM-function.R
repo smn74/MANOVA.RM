@@ -188,6 +188,6 @@ multRM <- function(formula, data, subject, within,
     warning("The covariance matrix is singular. The WTS provides no valid test statistic!")
   }
   
-  class(output) <- "MANOVA"
+  class(output) <- "RM"
   return(output)
 }
