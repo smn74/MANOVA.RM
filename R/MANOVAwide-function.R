@@ -291,6 +291,7 @@ MANOVA.wide <- function(formula, data,
     output$levels <- lev_names
     output$nested <- nest
     output$modelcall <- MANOVA.wide
+    output$modeltype <- "MANOVA.wide"
 
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

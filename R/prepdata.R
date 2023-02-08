@@ -84,6 +84,13 @@ if(nrow(data)/length(unique(subject)) != prod(fl[within])){
   Check for missing values in the data."))
 }
 
+
+# check whether data is ordered correctly
+if(no.whole >0 & !(whole[1] == colnames(dat)[2])){
+  stop("The within-subjects factor(s) must be last in the formula!")
+}
+
+
 if (nf == 1) {
   # one-way layout
   dat2 <- dat[order(dat[, 2]), ]

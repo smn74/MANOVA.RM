@@ -347,6 +347,7 @@ MANOVA <- function(formula, data, subject,
   output$levels <- lev_names
   output$nested <- nest
   output$modelcall <- MANOVA
+  output$modeltype <- "MANOVA"
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

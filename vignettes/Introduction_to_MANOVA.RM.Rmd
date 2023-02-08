@@ -64,7 +64,7 @@ head(o2cons)
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
 
-* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
 * `no.subf`: The number of within-subject factors, default is 1. Alternatively, the 
@@ -217,15 +217,12 @@ test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 
 summary(test)
 cr <- conf.reg(test)
 cr
+plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
 }
 ```
 
 The output consists of the necessary parameters specifying the ellipsoid: the center, the eigenvectors which determine the axes of the ellipsoid as well as the scaling factors for the eigenvectors, which are calculated based on the eigenvalues, the bootstrap quantile and the total sample size. For more information on the construction of the confidence ellipses see Friedrich and Pauly (2018). 
 For observations with two dimensions, the confidence ellipse can be plotted using the generic `plot` function. The usual plotting parameters can be used to customize the plots.
-
-```{r}
-plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
-```
 
 ### Post-hoc comparisons
 
@@ -253,11 +250,12 @@ As an example, we consider the `EEG_MANOVA` example from above:
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 ```
 
-Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
+<!--Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
 
 ```{r}
 #simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
 ```
+-->
 
 A one-way layout using MANOVA.wide():
 ```{r}
@@ -330,7 +328,7 @@ The `multRM()` function provides a combination of the approaches described above
 
 * `formula`: A model formula object. The left hand side contains the matrix of 
 response variables (using cbind()) and the right hand side contains the factor variables of interest.
-The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
+The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame, list or environment containing the variables in `formula`. Data must be 
 in long format and must not contain missing values.
 * `subject`: The column name of the subjects in the data. NOTE: Subjects within 
@@ -351,11 +349,13 @@ different groups of between-subject factors must have individual labels.
 As an example, we again use the EEG dataset. This time, imagine we have two outcomes (brainrate and complexity) measured for each of the three regions (within-subject factor). We additionally consider the between-subject factor sex. The `tidyr` package can be used to transform our original data to this format.
 
 ```{r}
+if (requireNamespace("tidyr", quietly = TRUE)) {
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 1000)
 summary(fit)
+}
 ```
 
 The output is similar to that of `MANOVA()` described above.

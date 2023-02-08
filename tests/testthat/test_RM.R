@@ -11,8 +11,6 @@ test_that("Means correctly calculated",{
            iter = 1, within = c("Time", "Staphylococci"))
   t2 <- RM(O2 ~ Group * Staphylococci * Time , data = o2cons, subject = "Subject",
            iter = 1, within = c("Time", "Staphylococci"))
-  t3 <- RM(O2 ~ Staphylococci * Time * Group, data = o2cons, subject = "Subject",
-           iter = 1, within = c("Time", "Staphylococci"))
   expect_equal(round(m[Group == "P" & Time == 6 & Staphylococci == 0, V1], 3),
                t1$Descriptive[1, "Means"], t2$Descriptive[1, "Means"])
   expect_equal(round(m[Group == "P" & Time == 18 & Staphylococci == 0, V1], 3),
@@ -64,3 +62,12 @@ test_that("missing values", {
   expect_error(RM(resp ~ sex * feature * region, data = EEG2, no.subf = 2,
                   subject = "id", iter = 1, CPU = 1))
 })
+
+
+
+test_that("error if within not last in formula", {
+  data(EEG)
+  expect_error(RM(O2 ~ Staphylococci * Time * Group, data = o2cons, subject = "Subject",
+                  iter = 1, within = c("Time", "Staphylococci")))
+})
+

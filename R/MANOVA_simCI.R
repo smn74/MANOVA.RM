@@ -38,6 +38,10 @@ simCI <- function(object, contrast, contmat = NULL, type = NULL,
     stop("simCI is currently only implemented for objects of class MANOVA.")
   }
   
+  if(object$modeltype == "multRM"){
+    stop("simCI is not yet implemented for repeated measures.")
+  }
+  
   if(object$nested){
     stop("The pairwise comparisons cannot be used in nested designs!")
   }

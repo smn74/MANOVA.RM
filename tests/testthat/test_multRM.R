@@ -11,8 +11,6 @@ test_that("Means correctly calculated",{
                within = c("region", "feature"), iter = 1, CPU =1)
   t2 <- multRM(resp ~ diagnosis * feature * region, data = EEG, subject = "id", 
                within = c("region", "feature"), iter = 1, CPU =1)
-  t3 <- multRM(resp ~ feature * region * diagnosis, data = EEG, subject = "id", 
-               within = c("region", "feature"), iter = 1, CPU =1)
   expect_equal(round(m[diagnosis == "AD" & region == "central" & feature == "brainrate", V1], 3),
                t1$Descriptive[1, "resp"], t2$Descriptive[1, "resp"])
   expect_equal(round(m[diagnosis == "SCC" & region == "frontal" & feature == "brainrate", V1], 3),
@@ -37,3 +35,11 @@ test_that("missing values", {
                       within = c("feature", "region"),
                   subject = "id", iter = 1, CPU = 1))
 })
+
+
+test_that("error if within not last in formula", {
+  data(EEG)
+  expect_error(multRM(resp ~ feature * region * diagnosis, data = EEG, subject = "id", 
+                      within = c("region", "feature"), iter = 1, CPU =1))
+})
+
