@@ -17,10 +17,12 @@
 #' Permuting longitudinal data in spite of the dependencies. 
 #' Journal of Multivariate Analysis, 153, 255-265.
 #' 
-#' @examples 
+#' @examples
+#'   if(requireNamespace("ggplot2")){ 
 #'   library(ggplot2)
 #'   ggplot(o2cons, aes(x=Group, y=O2)) + geom_point(alpha=0.5) + facet_grid(Staphylococci~Time) +
 #'   stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red") 
+#' }
 #' 
 "o2cons"
 
@@ -55,9 +57,11 @@
 #'   Doi: 10.1080/00273171.2018.1446320.
 #'   
 #' @examples 
+#' if(requireNamespace("ggplot2")){ 
 #'   library(ggplot2)
 #'   ggplot(EEG, aes(x=sex, y=resp)) + geom_point(alpha=0.5) + facet_grid(region+feature~diagnosis) +
 #'      stat_summary(fun.y = mean, fun.ymin = min, fun.ymax = max, colour = "red")
+#'   }
 #'   
 "EEG"
 
@@ -100,7 +104,9 @@
 #'   
 #'   
 #'   @examples 
+#'   if(requireNamespace("ggplot2")){ 
 #'   library("ggplot2")
 #'   qplot(data = EEGwide, diagnosis)
+#'   }
 #'   
 "EEGwide"

@@ -29,6 +29,7 @@ Imports:
     data.table (>= 1.12.6)
 LazyData: TRUE
 Suggests:
+    nparLD,
     knitr,
     rmarkdown,
     HSAUR3,
