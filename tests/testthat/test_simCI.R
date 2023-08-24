@@ -24,11 +24,13 @@ test_that("example 3: 3-way", {
 })
 
 test_that("nested design", {
-  library(GFD)
+  if(requireNamespace("GFD")){
+    library(GFD)
   data(curdies)
   set.seed(123)
   curdies$dug2 <- curdies$dugesia + rnorm(36)
   fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 10,
                       nested.levels.unique = TRUE, seed = 123, CPU = 1)
   expect_error(simCI(fit1, contrast = "pairwise", type = "Dunnett"))
-})
+}
+  })

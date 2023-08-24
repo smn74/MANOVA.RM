@@ -1,3 +1,7 @@
+# MANOVA.RM 0.5.4
+* fixing minor errors and bugs, including order of factors
+* removing GUI since package RGtk2 no longer exists
+
 # MANOVA.RM 0.5.1
 * improve RM function such that
   - no interaction term necessary

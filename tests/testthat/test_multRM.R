@@ -3,8 +3,9 @@ library(MANOVA.RM)
 context("multRM")
 
 test_that("Means correctly calculated",{
+  if(requireNamespace("data.table")){
+    library(data.table)
   data("EEG")
-  library(data.table)
   eeg2 <- as.data.table(EEG)
   m <- eeg2[, mean(resp), by = .(diagnosis, region, feature)]
   t1 <- multRM(resp ~ diagnosis * region * feature, data = EEG, subject = "id", 
@@ -15,7 +16,8 @@ test_that("Means correctly calculated",{
                t1$Descriptive[1, "resp"], t2$Descriptive[1, "resp"])
   expect_equal(round(m[diagnosis == "SCC" & region == "frontal" & feature == "brainrate", V1], 3),
                t1$Descriptive[15, "resp"], t2$Descriptive[14, "resp"])
-})
+}
+  })
 
 
 test_that("multRM equals RM",{

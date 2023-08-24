@@ -3,8 +3,9 @@ library(MANOVA.RM)
 context("RM output")
 
 test_that("Means correctly calculated",{
+  if(requireNamespace("data.table")){
+    library(data.table)
   data("o2cons")
-  library(data.table)
   ox <- as.data.table(o2cons)
   m <- ox[, mean(O2), by = .(Group, Time, Staphylococci)]
   t1 <- RM(O2 ~ Group * Time * Staphylococci, data = o2cons, subject = "Subject",
@@ -15,7 +16,8 @@ test_that("Means correctly calculated",{
                t1$Descriptive[1, "Means"], t2$Descriptive[1, "Means"])
   expect_equal(round(m[Group == "P" & Time == 18 & Staphylococci == 0, V1], 3),
                t1$Descriptive[5, "Means"], t2$Descriptive[3, "Means"])
-})
+}
+  })
 
 test_that("example 1: 1 whole, 2 sub",{
   oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
@@ -40,15 +42,17 @@ test_that("example 3: only subplot factors",{
 })
 
 test_that("correct mean calculation",{
+  if(requireNamespace("GFD")){
+    library(GFD)
   data("o2cons")
-  library(GFD)
   oxy <- o2cons[o2cons$Group == "P" & o2cons$Staphylococci == 1, ]
   mod1 <- RM(O2 ~ Time, data = oxy, subject = "Subject", no.subf = 1,
              iter = 10, CPU = 1)
   mod2 <- GFD(O2 ~ Time, data = oxy, nperm = 10)
   # WTS and ATS differ, since GFD ignores dependency structure
   expect_equal(c(mod1$Descriptive["Means"]), c(round(mod2$Descriptive["Means"], 3)))
-})
+}
+  })
 
 test_that("wrong interaction",{
   data(EEG)

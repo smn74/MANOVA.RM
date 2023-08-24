@@ -30,7 +30,8 @@ test_that("example 3: three-way",{
 })
 
 test_that("example 4: nested design",{
-  library(GFD)
+  if(requireNamespace("GFD")){
+    library(GFD)
   data(curdies)
   set.seed(123)
   curdies$dug2 <- curdies$dugesia + rnorm(36)
@@ -38,6 +39,7 @@ test_that("example 4: nested design",{
                        nested.levels.unique = TRUE, CPU = 1)
   names(mod$WTS) <- NULL
   expect_equal(mod$WTS[1], 6.999)
+  }
 })
 
 

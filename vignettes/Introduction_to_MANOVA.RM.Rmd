@@ -360,16 +360,16 @@ summary(fit)
 
 The output is similar to that of `MANOVA()` described above.
 
-
+<!--
 ## optional GUI
 
 The `MANOVA.RM` package is equipped with an optional graphical user interface, which is based on `RGtk2`. The GUI may be started in `R` (if `RGtk2` is installed) using the
 command `GUI.RM()` and `GUI.MANOVA()` or `GUI.MANOVAwide()` for repeated measures designs and multivariate data, respectively. 
 
 ```{r}
-if (requireNamespace("RGtk2", quietly = TRUE)) {
-GUI.MANOVA()
-}
+#if (requireNamespace("RGtk2", quietly = TRUE)) {
+#GUI.MANOVA()
+#}
 ```
 
 The user can specify the data location
@@ -380,9 +380,10 @@ data frame and the resampling method.
 Additionally, one can specify whether or not headers are
 included in the data file, and which separator (e.g., ',' for *.csv files) and character symbols are used for decimals
 in the data file. 
-<!-- The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
-parameters. -->
+The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
+parameters.
 For the `multRM()` function there is no GUI available yet.
+-->
 
 ## References
 
