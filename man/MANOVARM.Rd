@@ -3,6 +3,7 @@
 \docType{package}
 \name{MANOVARM}
 \alias{MANOVARM}
+\alias{MANOVA.RM-package}
 \title{MANOVA.RM: A package for calculating test statistics and their resampling versions for
 heteroscedastic semi-parametric multivariate data or repeated measures designs.}
 \description{

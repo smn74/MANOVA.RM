@@ -38,7 +38,7 @@ Suggests:
     GFD,
     testthat
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
 VignetteBuilder: knitr, rmarkdown
 URL: https://github.com/smn74/MANOVA.RM
 BugReports: https://github.com/smn74/MANOVA.RM/issues

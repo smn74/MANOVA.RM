@@ -58,4 +58,5 @@
 #'  
 #'@docType package
 #'@name MANOVARM
+#'@aliases MANOVA.RM-package
 NULL
