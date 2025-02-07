@@ -64,10 +64,10 @@ head(o2cons)
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
 
-* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `outcome ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `no.subf`: The number of within-subject factors, default is 1. Alternatively, the 
+* `no.subf`: The number of within-subject factors, default is 1. Alternatively, the
 within-subjects factors can be directly specified using `within`.
 * `iter`: The number of iterations for the resampling approach. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.

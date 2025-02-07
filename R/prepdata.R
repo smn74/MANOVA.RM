@@ -9,7 +9,9 @@ if (!(subject %in% names(data))){
   stop("The subject variable is not found!")
 }
 subject <- data[[subject]]
-if (length(subject) != nrow(dat) && nrow(subject)!= nrow(data)){
+# 07.02.25: remove  && nrow(subject)!= nrow(data) from below call
+# since it's suddenly causing errors
+if (length(subject) != nrow(dat)){
   stop("There are missing values in the data.")
 }
 
