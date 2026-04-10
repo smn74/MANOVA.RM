@@ -1,3 +1,5 @@
+#' @keywords internal
+#'
 #'MANOVA.RM: A package for calculating test statistics and their resampling versions for
 #'heteroscedastic semi-parametric multivariate data or repeated measures designs.
 #'
@@ -56,6 +58,7 @@
 #'  Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
 #'  heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 #'  
-#'@name MANOVARM
-#'@aliases MANOVA.RM-package
+#'  @keywords internal
 "_PACKAGE"
+
+NULL
