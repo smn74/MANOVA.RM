@@ -20,8 +20,15 @@
 #' @details The RM.MCTP() function computes p-values and confidence intervals for the chosen contrast with MCTP and with Wild Bootstrap.
 #'    
 #' @return P-values and simultaneous confidence intervals for the chosen contrasts. 
+<<<<<<< HEAD
 #'
 #'@export
+=======
+
+
+
+
+>>>>>>> 269358b1ec887b8a9d5bec107ea796254a69c52e
 
 RM.MCTP <- function(object, alpha = 0.05, iter = 10000, contrast, contmat = NULL, type = NULL, factor_name = NULL, base  = 1, seed = NULL){
   
