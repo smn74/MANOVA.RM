@@ -56,7 +56,6 @@
 #'  Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
 #'  heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 #'  
-#' _PACKAGE
 #'@name MANOVARM
 #'@aliases MANOVA.RM-package
-NULL
+"_PACKAGE"
