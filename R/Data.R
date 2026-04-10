@@ -106,7 +106,8 @@
 #'   @examples 
 #'   if(requireNamespace("ggplot2")){ 
 #'   library("ggplot2")
-#'   qplot(data = EEGwide, diagnosis)
+#'   ggplot(EEGwide, aes(x = diagnosis)) +
+#'   geom_bar()
 #'   }
 #'   
 "EEGwide"

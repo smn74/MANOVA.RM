@@ -23,6 +23,8 @@
 #'    
 #' @return P-values and simultaneous confidence intervals for the chosen contrasts. 
 #'
+#'@importFrom stats aggregate
+#'
 #'@export
 
 RM.MCTP <- function(object, alpha = 0.05, iter = 10000, contrast, contmat = NULL, type = NULL, factor_name = NULL, base  = 1, seed = NULL){
@@ -50,7 +52,7 @@ RM.MCTP <- function(object, alpha = 0.05, iter = 10000, contrast, contmat = NULL
   no.subf <- object$plotting$no.subf
   fl <- object$plotting$fl
   
-  prep.dat <- MANOVA.RM:::prepare.data(formula = formula, data = data,
+  prep.dat <- prepare.data(formula = formula, data = data,
                                        subject = subject, within = within)
   d <- prep.dat[["lev.sub"]]
   no.whole <- prep.dat[["no.whole"]]

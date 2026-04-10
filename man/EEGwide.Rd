@@ -29,7 +29,8 @@ Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. a
   @examples 
   if(requireNamespace("ggplot2")){ 
   library("ggplot2")
-  qplot(data = EEGwide, diagnosis)
+  ggplot(EEGwide, aes(x = diagnosis)) +
+  geom_bar()
   }
 }
 \usage{
