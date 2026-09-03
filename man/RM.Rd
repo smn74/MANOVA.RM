@@ -14,8 +14,8 @@ RM(
   alpha = 0.05,
   resampling = "Perm",
   para = FALSE,
-  CPU,
-  seed,
+  CPU = NULL,
+  seed = NULL,
   CI.method = "t-quantile",
   dec = 3
 )

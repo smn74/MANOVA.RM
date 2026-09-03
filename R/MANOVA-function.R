@@ -89,7 +89,6 @@
 #' @importFrom graphics axis legend par plot title abline points
 #' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom quantile as.formula
 #' @importFrom utils read.table
-#' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
 #' @importFrom parallel makeCluster parSapply detectCores
 #' @importFrom ellipse ellipse
@@ -98,8 +97,8 @@
 
 MANOVA <- function(formula, data, subject,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", 
-                   para = FALSE, CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3){
+                   para = FALSE, CPU = NULL,
+                   seed = NULL, nested.levels.unique = FALSE, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
@@ -110,15 +109,9 @@ MANOVA <- function(formula, data, subject,
   }
   
   if(para){
-    test1 <- hasArg(CPU)
-    if(!test1){
+    if(is.null(CPU)){
       CPU <- parallel::detectCores()
     }
-  }
-  
-  test2 <- hasArg(seed)
-  if(!test2){
-    seed <- 0
   }
   
   input_list <- list(formula = formula, data = data,
@@ -140,22 +133,12 @@ MANOVA <- function(formula, data, subject,
   nf <- ncol(dat) - 1
   nadat <- names(dat)
   nadat2 <- nadat[-1]
-  fl <- NA
-  for (aa in 1:nf) {
-    fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
-  }
-  levels <- list()
-  for (jj in 1:nf) {
-    levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
-  }
+  fl <- sapply(2:(nf + 1), function(aa) nlevels(as.factor(dat[, aa])))
+  levels <- lapply(2:(nf + 1), function(jj) base::levels(as.factor(dat[, jj])))
   lev_names <- expand.grid(levels)
   
   # number of hypotheses
-  tmp <- 0
-  for (i in 1:nf) {
-    tmp <- c(tmp, choose(nf, i))
-    nh <- sum(tmp)
-  }
+  nh <- 2^nf - 1  # sum(choose(nf, 1:nf))
   
   if (nf == 1) {
     # one-way layout
@@ -175,7 +158,7 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha,
-                           resampling, n.groups = fl, p, para, CPU, seed, nf)    
+                           resampling, n.groups = fl, p, para, CPU, seed)
     WTS_out[1, ] <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
@@ -185,7 +168,7 @@ MANOVA <- function(formula, data, subject,
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
-    colnames(WTS_out) <- cbind ("Test statistic", "df",
+    colnames(WTS_out) <- c("Test statistic", "df",
                                 "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     #WTPS_out[WTPS_out == 0] <- "<0.001"
@@ -262,7 +245,7 @@ MANOVA <- function(formula, data, subject,
         form2 <- as.formula(paste(outcome_names, "~", paste(fac_names, collapse = "*")))
         perm_names2 <- t(attr(terms(form2), "factors")[-1, ])
         fac_names2 <- attr(terms(form2), "term.labels")
-        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p, nh)
+        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p)
         hypo_matrices <- hyps[[1]]
         fac_names2 <- hyps[[2]]
         # choose only relevant entries of the hypo matrices
@@ -270,7 +253,7 @@ MANOVA <- function(formula, data, subject,
         hypo_matrices <- lapply(indices, function(x) hypo_matrices[[x]])
         
       } else {
-        hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
+        hyps <- HC_MANOVA(fl, perm_names, fac_names, p)
         hypo_matrices <- hyps[[1]]
         fac_names <- hyps[[2]]
       }
@@ -311,7 +294,7 @@ MANOVA <- function(formula, data, subject,
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
                              iter, alpha, resampling, n.groups, p,
-                             para, CPU, seed, nf)
+                             para, CPU, seed)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)
@@ -321,8 +304,8 @@ MANOVA <- function(formula, data, subject,
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
-    colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    colnames(WTS_out) <- c("Test statistic", "df", "p-value")
+    colnames(WTPS_out) <- c(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     # WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     

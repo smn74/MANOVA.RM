@@ -2,24 +2,24 @@
 # nf: number of factors involved
 # fl: vector of factorlevels, i.e. (a, b, c, ....) of size nf
 
-HC <- function(fl, perm_names, names){
+HC <- function(fl, perm_names, names, p = NULL){
   nf <- length(fl)
   # centering matrix
   P <- function(x){
     P <- diag(x) - matrix(1 / x, ncol = x, nrow = x)
     return(P)
   }
-  # scaled one-vectors
+  # scaled one-vectors (RM) or one-matrices (MANOVA)
   One <- function(x){
-    I <- t(1 / x * matrix(1, ncol = 1, nrow = x))
+    if (is.null(p)){
+      I <- t(1 / x * matrix(1, ncol = 1, nrow = x))  # RM: row vector
+    } else {
+      I <- matrix(1 / x, ncol = x, nrow = x)          # MANOVA: square averaging matrix
+    }
     return(I)
   }
   # number of hypotheses
-  tmp <- 0
-  for (i in 1:nf) {
-    tmp <- c(tmp, choose(nf, i))
-    nh <- sum(tmp)
-  }
+  nh <- 2^nf - 1  # sum(choose(nf, 1:nf))
   # calculate the permutation of the names
   Z <- 0:(nf - 1)
   position <- rep(0, nh)
@@ -77,5 +77,9 @@ HC <- function(fl, perm_names, names){
   }
   # nf-fold interaction
   hypo[[nh]] <- kp(B)
+  # MANOVA: tensor product with I_p
+  if (!is.null(p)){
+    for (i in 1:nh) hypo[[i]] <- hypo[[i]] %x% diag(p)
+  }
   return(list(hypo, fac_names))
 }

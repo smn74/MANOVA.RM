@@ -55,8 +55,8 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", 
-                   para = FALSE, CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3, ...){
+                   para = FALSE, CPU = NULL,
+                   seed = NULL, nested.levels.unique = FALSE, dec = 3, ...){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
@@ -65,15 +65,9 @@ MANOVA.wide <- function(formula, data,
   output <- list()
   
   if(para){
-    test1 <- hasArg(CPU)
-    if(!test1){
+    if(is.null(CPU)){
       CPU <- parallel::detectCores()
     }
-  }
-  
-  test2 <- hasArg(seed)
-  if(!test2){
-    seed <- 0
   }
   
   input_list <- list(formula = formula, data = data,
@@ -99,21 +93,11 @@ MANOVA.wide <- function(formula, data,
   names(dat) <- c("response", EF)
   #no. dimensions
   p <- ncol(as.matrix(dat$response))
-  fl <- NA
-  for (aa in 1:nf) {
-    fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
-  }
-  levels <- list()
-  for (jj in 1:nf) {
-    levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
-  }
+  fl <- sapply(2:(nf + 1), function(aa) nlevels(as.factor(dat[, aa])))
+  levels <- lapply(2:(nf + 1), function(jj) base::levels(as.factor(dat[, jj])))
   lev_names <- expand.grid(levels)
   # number of hypotheses
-  tmp <- 0
-  for (i in 1:nf) {
-    tmp <- c(tmp, choose(nf, i))
-    nh <- sum(tmp)
-  }
+  nh <- 2^nf - 1  # sum(choose(nf, 1:nf))
   
   # MANOVA vs. MANOVAwide?
   if(sum(grepl("cbind", formula)) == 0 && p != 1){
@@ -197,7 +181,7 @@ MANOVA.wide <- function(formula, data,
         form2 <- as.formula(paste(outcome_names, "~", paste(fac_names, collapse = "*")))
         perm_names2 <- t(attr(terms(form2), "factors")[-1, ])
         fac_names2 <- attr(terms(form2), "term.labels")
-        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p, nh)
+        hyps <- HC_MANOVA(fl, perm_names2, fac_names2, p)
         hypo_matrices <- hyps[[1]]
         fac_names2 <- hyps[[2]]
         # choose only relevant entries of the hypo matrices
@@ -205,7 +189,7 @@ MANOVA.wide <- function(formula, data,
         hypo_matrices <- lapply(indices, function(x) hypo_matrices[[x]])
         
       } else if(nf !=1){
-        hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
+        hyps <- HC_MANOVA(fl, perm_names, fac_names, p)
         hypo_matrices <- hyps[[1]]
         fac_names <- hyps[[2]]
       }
@@ -214,13 +198,7 @@ MANOVA.wide <- function(formula, data,
     # correcting for "empty" combinations (if no interaction specified)
     n.groups <- prod(fl)
     if(nf != 1 & length(Y) != n.groups){
-      index <- NULL
-      for(i in 1:length(Y)){
-        if(nrow(Y[[i]]) == 0){
-           index <- c(index, i)
-        }
-      }
-      Y <- Y[-index]
+      Y <- Y[sapply(Y, nrow) > 0]
     }
     Y2 <- lapply(Y, function(x) x$response)
     if (p==1){
@@ -267,8 +245,8 @@ MANOVA.wide <- function(formula, data,
     descriptive <- cbind(unique(lev_names), n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)
     rownames(descriptive) <- NULL
-    colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
+    colnames(WTS_out) <- c("Test statistic", "df", "p-value")
+    colnames(WTPS_out) <- c(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     #WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     

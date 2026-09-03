@@ -117,14 +117,16 @@
 #' @importFrom utils read.table
 #' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
-#' @importFrom parallel makeCluster parSapply detectCores
+#' @importFrom parallel makeCluster parLapply stopCluster clusterSetRNGStream detectCores
 #' @importFrom data.table as.data.table
 #' 
 #' @export
 
 RM <- function(formula, data, subject,
-               within, no.subf, iter = 10000, alpha = 0.05, resampling = "Perm",
-               para = FALSE, CPU, seed, CI.method = "t-quantile", dec = 3){
+               within, no.subf, iter = 10000, alpha = 0.05, 
+               resampling = "Perm",
+               para = FALSE, CPU = NULL, seed = NULL, 
+               CI.method = "t-quantile", dec = 3){
   
   if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
     stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
@@ -135,16 +137,12 @@ RM <- function(formula, data, subject,
   }
   
   if(para){
-    test1 <- hasArg(CPU)
-    if(!test1){
+    if(is.null(CPU)){
       CPU <- parallel::detectCores()
     }
   }
   
-  test2 <- hasArg(seed)
-  if(!test2){
-    seed <- 0
-  }
+
   
   input_list <- list(formula = formula, data = data,
                      subject = subject, 

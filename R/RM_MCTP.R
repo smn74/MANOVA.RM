@@ -24,6 +24,7 @@
 #' @return P-values and simultaneous confidence intervals for the chosen contrasts. 
 #'
 #'@importFrom stats aggregate
+#'@importFrom mvtnorm qmvnorm pmvnorm
 #'
 #'@export
 

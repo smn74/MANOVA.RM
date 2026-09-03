@@ -9,10 +9,11 @@
 Implemented are various tests for semi-parametric repeated measures and general MANOVA designs that do neither assume multivariate normality nor covariance homogeneity, i.e., the procedures are applicable for a wide range of general multivariate factorial designs. In addition to asymptotic inference methods, novel bootstrap and permutation approaches are implemented as well. These provide more accurate results in case of small to moderate sample sizes. Furthermore, post-hoc comparisons are provided for the multivariate analyses. Friedrich, S., Konietschke, F. and Pauly, M. (2019) \doi{10.32614/RJ-2019-051}.
 }
 \section{MANOVA and MANOVA.wide function}{
+
  The MANOVA() and MANOVA.wide() functions provide
  the Wald-type statistic (WTS) as well as a modified ANOVA-type statistic (MATS)
  as in Friedrich and Pauly (2018)
- for multivariate designs with metric data as described in 
+ for multivariate designs with metric data as described in
  Konietschke et al. (2015). These are applicable
  for non-normal error terms, different sample sizes and/or
  heteroscedastic variances. The MATS can even handle designs involving singular
@@ -26,6 +27,7 @@ Implemented are various tests for semi-parametric repeated measures and general 
 }
 
 \section{RM function}{
+
  The RM() function provides the Wald-type
  statistic (WTS) as well as the ANOVA-type statistic (ATS) for repeated measures designs
  with metric data as described in Friedrich et al. (2017).
@@ -38,6 +40,7 @@ Implemented are various tests for semi-parametric repeated measures and general 
 }
 
 \section{multRM function}{
+
  The multRM() function is a combination of the procedures
  above suited for multivariate repeated measures designs. It provides the WTS and the MATS
  along with p-values based on a parametric or a wild bootstrap approach.
@@ -45,29 +48,27 @@ Implemented are various tests for semi-parametric repeated measures and general 
 
 \references{
 Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
-of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM. 
-The R Journal, 11(2), 380-400.
+ of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM.
+ The R Journal, 11(2), 380-400.
 
-Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
+ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
  Parametric and nonparametric bootstrap methods for general MANOVA. Journal
  of Multivariate Analysis, 140, 291-301.
- 
+
  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
  in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
- 
- Friedrich, S., Konietschke, F., Pauly, M. (2016). GFD - An
- R-package for the Analysis of General Factorial Designs. 
+
+ Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An
+ R-package for the Analysis of General Factorial Designs.
  Journal of Statistical Software, 79(1), 1-18.
- 
-  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
-  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
-  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
-  Doi: 10.1080/00273171.2018.1446320.
- 
+
+ Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and
+ Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated
+ Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research.
+ Doi: 10.1080/00273171.2018.1446320.
+
  Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
  heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
- 
- @keywords internal
 }
 \seealso{
 Useful links:
@@ -77,39 +78,15 @@ Useful links:
 }
 
 }
-\keyword{A}
-\keyword{MANOVA(),}
-\keyword{MANOVA.RM}
-\keyword{MANOVA.RM:}
-\keyword{RM()}
-\keyword{The}
-\keyword{and}
-\keyword{be}
-\keyword{below.}
-\keyword{calculating}
-\keyword{data}
-\keyword{designs.}
-\keyword{detail}
-\keyword{explained}
-\keyword{for}
-\keyword{functions:}
-\keyword{heteroscedastic}
-\keyword{important}
-\keyword{in}
+\author{
+\strong{Maintainer}: Sarah Friedrich \email{sarah.friedrich@math.uni-augsburg.de}
+
+Authors:
+\itemize{
+  \item Frank Konietschke
+  \item Markus Pauly
+  \item Mona Modrzik
+}
+
+}
 \keyword{internal}
-\keyword{measures}
-\keyword{multRM()}
-\keyword{multivariate}
-\keyword{or}
-\keyword{package}
-\keyword{provides}
-\keyword{repeated}
-\keyword{resampling}
-\keyword{semi-parametric}
-\keyword{statistics}
-\keyword{test}
-\keyword{their}
-\keyword{three}
-\keyword{versions}
-\keyword{which}
-\keyword{will}

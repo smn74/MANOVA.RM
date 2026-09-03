@@ -1,3 +1,14 @@
+# MANOVA.RM 0.6.0
+  * `seed` and `CPU` are now `NULL` by default in all main functions; previously `set.seed(0)` was silently called
+  on every run, even when no seed was specified.
+  * Fixed `plot.RM()` to use dynamic confidence interval column names so that
+  plots are correct for any value of `alpha`, not only the default `alpha = 0.05`.
+  * Fixed incorrect calculation of covariance matrix in Wild Bootstrap.
+  * Simplified code in various places
+  * Documentation and package infrastructure updated
+
+
+
 # MANOVA.RM 0.5.4
 * fixing minor errors and bugs, including order of factors
 * removing GUI since package RGtk2 no longer exists

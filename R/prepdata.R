@@ -38,7 +38,7 @@ outcome_names <- rownames(nr_hypo)[1]  # names of outcome variables
 if (grepl("cbind", outcome_names)){
   split1 <- strsplit(outcome_names, "(", fixed = TRUE)[[1]][-1]
   split2 <- strsplit(split1, ")", fixed = TRUE)[[1]]
-  split3 <<- strsplit(split2, ",")[[1]]
+  split3 <- strsplit(split2, ",")[[1]]
 } else {
   split3 <- outcome_names
 }
@@ -48,21 +48,11 @@ nf <- length(EF)
 names(dat) <- c("response", EF, "subject")
 #no. dimensions
 p <- ncol(as.matrix(dat$response))
-fl <- NA
-for (aa in 1:nf) {
-  fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
-}
-levels <- list()
-for (jj in 1:nf) {
-  levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
-}
+fl <- sapply(2:(nf + 1), function(aa) nlevels(as.factor(dat[, aa])))
+levels <- lapply(2:(nf + 1), function(jj) base::levels(as.factor(dat[, jj])))
 lev_names <- expand.grid(levels)
 # number of hypotheses
-tmp <- 0
-for (i in 1:nf) {
-  tmp <- c(tmp, choose(nf, i))
-  nh <- sum(tmp)
-}
+nh <- 2^nf - 1  # sum(choose(nf, 1:nf))
 
 names(fl) <- fac_names_simple
 
@@ -143,13 +133,7 @@ hypo_matrices <- lapply(hypo, function(x) x %x% diag(p))
 # correcting for "empty" combinations (if no interaction specified)
 n.groups <- prod(fl[whole])
 if(nf != 1 & length(Y) != n.groups){
-  index <- NULL
-  for(i in 1:length(Y)){
-    if(nrow(Y[[i]]) == 0){
-      index <- c(index, i)
-    }
-  }
-  Y <- Y[-index]
+  Y <- Y[sapply(Y, nrow) > 0]
 }
 
 Ywhole <- lapply(Y, function(x) x$response)

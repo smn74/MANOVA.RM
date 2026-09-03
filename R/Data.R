@@ -101,13 +101,11 @@
 #'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
 #'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
 #'   Doi: 10.1080/00273171.2018.1446320.
-#'   
-#'   
-#'   @examples 
-#'   if(requireNamespace("ggplot2")){ 
-#'   library("ggplot2")
-#'   ggplot(EEGwide, aes(x = diagnosis)) +
+#'
+#' @examples
+#' \dontrun{
+#' library("ggplot2")
+#' ggplot(EEGwide, aes(x = diagnosis)) +
 #'   geom_bar()
-#'   }
-#'   
+#' }
 "EEGwide"

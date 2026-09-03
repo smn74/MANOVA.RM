@@ -11,23 +11,12 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   means <- c(means)
   
   V <- lapply(Y, cov)
-  sigma_hat <- 1/nind[1]*V[[1]]
-  if(a != 1){
-    for (i in 2:a){
-      sigma_hat <- magic::adiag(sigma_hat, 1/nind[i]*V[[i]])
-    }
-  }
+  sigma_hat <- Reduce(magic::adiag, lapply(seq_along(nind), function(i) V[[i]]/nind[i]))
   Sn <- N * sigma_hat
   
   
   #---------------- useful matrices ---------------------#
-   A <- diag(n.sub) %x% t(rep(1 / nind[1], nind[1]))
-   if(a != 1){
-   for (ii in 2:length(nind)){
-     B <- diag(n.sub) %x% t(rep(1 / nind[ii], nind[ii]))
-     A <- magic::adiag(A, B)
-   } 
-   }
+  A <- Reduce(magic::adiag, lapply(seq_along(nind), function(ii) diag(n.sub) %x% t(rep(1/nind[ii], nind[ii]))))
   # -----------------------------------------------------#
   # WTS
   T <- t(H) %*% MASS::ginv(H %*% Sn %*% t(H)) %*% H
@@ -61,12 +50,7 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
       VP[[i]] <- cov(yperm)
     }
     
-    sigma_hatP <- 1/nind[1]*VP[[1]]
-    if(a != 1){
-      for (i in 2:a){
-        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
-      }
-    }
+    sigma_hatP <- Reduce(magic::adiag, lapply(seq_along(nind), function(i) VP[[i]]/nind[i]))
     SnP <- N * sigma_hatP
     # WTPS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
@@ -88,12 +72,7 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
     
     VP <- lapply(XP, cov)
     
-    sigma_hatP <- 1/nind[1]*VP[[1]]
-    if (a != 1){
-      for (i in 2:a){
-        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
-      }
-    }
+    sigma_hatP <- Reduce(magic::adiag, lapply(seq_along(nind), function(i) VP[[i]]/nind[i]))
     SnP <- N * sigma_hatP
     
     # WTS
@@ -122,13 +101,8 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
     }
     meansP <- unlist(meansP)
     
-    sigma_hatP <- VP[[1]]
-    if (a != 1){
-    for (i in 2:a){
-      sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
-    }
-    }
-    SnP <- N * sigma_hat
+    sigma_hatP <- Reduce(magic::adiag, VP)
+    SnP <- N * sigma_hatP
     
     # WTS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
@@ -142,9 +116,9 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   }
   
   if(para){
-    cl <- makeCluster(CPU)
+    cl <- parallel::makeCluster(CPU)
   
-  if(seed != 0){
+  if(!is.null(seed)){
     parallel::clusterSetRNGStream(cl, iseed = seed)
   }
   
@@ -155,11 +129,11 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   } else if(resampling == "WildBS"){
     bs_out <- parallel::parLapply(cl, 1:iter, WBS)
   }
-  WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
-  ATSbs <- parallel::parSapply(cl, bs_out, function(x) x$ATS_res)
+  WTPS <- sapply(bs_out, function(x) x$WTPS)
+  ATSbs <- sapply(bs_out, function(x) x$ATS_res)
   parallel::stopCluster(cl)
   } else {
-    set.seed(seed)
+    if(!is.null(seed)) set.seed(seed)
     if(resampling == "Perm"){
       bs_out <-lapply(1:iter, Perm)
     } else if(resampling == "paramBS"){

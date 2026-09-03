@@ -24,14 +24,6 @@ Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. a
   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
   Doi: 10.1080/00273171.2018.1446320.
-  
-  
-  @examples 
-  if(requireNamespace("ggplot2")){ 
-  library("ggplot2")
-  ggplot(EEGwide, aes(x = diagnosis)) +
-  geom_bar()
-  }
 }
 \usage{
 data(EEGwide)
@@ -50,5 +42,12 @@ feature (brain rate, complexity) structure the response vector.
 \details{
 Note that this data set contains exactly the same data as the data set 'EEG', only the format is different. The 
 transformation between the different formats can be achieved using, e.g., the \code{tidyr} package.
+}
+\examples{
+\dontrun{
+library("ggplot2")
+ggplot(EEGwide, aes(x = diagnosis)) +
+  geom_bar()
+}
 }
 \keyword{datasets}

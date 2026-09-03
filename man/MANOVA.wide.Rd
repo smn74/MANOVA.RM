@@ -11,8 +11,8 @@ MANOVA.wide(
   alpha = 0.05,
   resampling = "paramBS",
   para = FALSE,
-  CPU,
-  seed,
+  CPU = NULL,
+  seed = NULL,
   nested.levels.unique = FALSE,
   dec = 3,
   ...

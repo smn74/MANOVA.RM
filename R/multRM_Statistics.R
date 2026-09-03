@@ -15,12 +15,7 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
   means <- c(means)
   
   V <- lapply(Y, cov)
-  sigma_hat <- 1/nind[1]*V[[1]]
-  if(a != 1){
-    for (i in 2:a){
-      sigma_hat <- magic::adiag(sigma_hat, 1/nind[i]*V[[i]])
-    }
-  }
+  sigma_hat <- Reduce(magic::adiag, lapply(seq_along(nind), function(i) V[[i]]/nind[i]))
   Sn <- N * sigma_hat
   
   # WTS
@@ -46,12 +41,7 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
     
     VP <- lapply(XP, cov)
     
-    sigma_hatP <- 1/nind[1]*VP[[1]]
-    if (a != 1){
-      for (i in 2:a){
-        sigma_hatP <- magic::adiag(sigma_hatP, 1/nind[i]*VP[[i]])
-      }
-    }
+    sigma_hatP <- Reduce(magic::adiag, lapply(seq_along(nind), function(i) VP[[i]]/nind[i]))
     SnP <- N * sigma_hatP
     
     # WTS
@@ -80,12 +70,7 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
     }
     meansP <- unlist(meansP)
     
-    sigma_hatP <- VP[[1]]
-    if (a != 1){
-      for (i in 2:a){
-        sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
-      }
-    }
+    sigma_hatP <- Reduce(magic::adiag, VP)
     SnP <- N * sigma_hatP
     
     # WTS
@@ -100,8 +85,8 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
   #-------------------------------------------------------------
   
   if(para){
-    cl <- makeCluster(CPU)
-    if(seed != 0){
+    cl <- parallel::makeCluster(CPU)
+    if(!is.null(seed)){
       parallel::clusterSetRNGStream(cl, iseed = seed)
     }
     if(resampling == "paramBS"){
@@ -110,14 +95,14 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
       bs_out <- parallel::parLapply(cl, 1:iter, WBS)
     }
     
-    WTPS <- parallel::parSapply(cl, bs_out, function(x) x$WTPS)
-    MATSbs <- parallel::parSapply(cl, bs_out, function(x) x$Q_N_P)
-    BSmeans <- parallel::parLapply(cl, bs_out, function(x) x$meansP)
-    BSVar <- parallel::parLapply(cl, bs_out, function(x) x$DP)
+    WTPS <- sapply(bs_out, function(x) x$WTPS)
+    MATSbs <- sapply(bs_out, function(x) x$Q_N_P)
+    BSmeans <- lapply(bs_out, function(x) x$meansP)
+    BSVar <- lapply(bs_out, function(x) x$DP)
     parallel::stopCluster(cl)
   } else {
     
-    if(seed != 0){
+    if(!is.null(seed)){
       set.seed(seed)
     }
     if(resampling == "paramBS"){

@@ -1,4 +1,4 @@
-xaxt <- NULL
+utils::globalVariables(c("xaxt"))
 #' Plot function for an RM object
 #' 
 #' Generic plot function for \code{RM} objects: Returns a plot of the mean 
@@ -33,8 +33,10 @@ plot.RM <- function (x, leg = TRUE, ...) {
   label.x <- names(a$fl[nf])
   sum.fac <- sum(a$fl)
   xmax <- a$fl[nf]+ (sum.fac-a$fl[nf])*gap
-  miny <- min(b$`Lower 95 % CI`)
-  maxy <- max(b$`Upper 95 % CI`)
+  ci_low <- grep("Lower", names(b))
+  ci_up  <- grep("Upper", names(b))
+  miny <- min(b[, ci_low])
+  maxy <- max(b[, ci_up])
   # default values
   args <- list(a,
                b,

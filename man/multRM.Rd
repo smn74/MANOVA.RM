@@ -13,8 +13,8 @@ multRM(
   alpha = 0.05,
   resampling = "paramBS",
   para = FALSE,
-  CPU,
-  seed,
+  CPU = NULL,
+  seed = NULL,
   dec = 3
 )
 }

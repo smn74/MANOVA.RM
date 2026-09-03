@@ -1,9 +1,21 @@
 Package: MANOVA.RM
 Type: Package
 Title: Resampling-Based Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.5.5
-Date: 2026-03-31
-Author: Sarah Friedrich, Frank Konietschke, Markus Pauly, Mona Modrzik
+Version: 0.6.0
+Date: 2026-09-03
+Authors@R: c(person(given = "Sarah",
+                      family = "Friedrich",
+                      role = c("aut", "cre"),
+                      email = "sarah.friedrich@math.uni-augsburg.de"),
+               person(given = "Frank",
+                      family = "Konietschke",
+                      role = "aut"),
+               person(given = "Markus",
+                      family = "Pauly",
+                      role = "aut"),
+               person(given = "Mona",
+                      family = "Modrzik",
+                      role = "aut"))
 Maintainer: Sarah Friedrich <sarah.friedrich@math.uni-augsburg.de>
 Depends:
     R (>= 3.4.0)    
@@ -26,6 +38,7 @@ Imports:
     methods,
     ellipse,
     multcomp,
+    mvtnorm,
     data.table (>= 1.12.6)
 LazyData: TRUE
 Suggests:

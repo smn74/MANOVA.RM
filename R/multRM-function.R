@@ -83,7 +83,6 @@
 #' @importFrom graphics axis legend par plot title
 #' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom
 #' @importFrom utils read.table
-#' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
 #' @importFrom parallel makeCluster parSapply detectCores
 #' @importFrom data.table as.data.table
@@ -92,23 +91,19 @@
 
 multRM <- function(formula, data, subject, within,
                    iter = 10000, alpha = 0.05, resampling = "paramBS",
-                   para = FALSE, CPU, seed, dec = 3){
+                   para = FALSE, CPU = NULL, seed = NULL, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
   
   if(para){
-    test1 <- hasArg(CPU)
-    if(!test1){
+    if(is.null(CPU)){
       CPU <- parallel::detectCores()
     }
   }
   
-  test2 <- hasArg(seed)
-  if(!test2){
-    seed <- 0
-  }
+
   
   input_list <- list(formula = formula, data = data,
                      iter = iter, alpha = alpha, resampling = resampling, seed = seed)
