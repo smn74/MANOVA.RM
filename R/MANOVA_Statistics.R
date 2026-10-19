@@ -1,6 +1,6 @@
 ## function for calculating test statistics for MANOVA
 MANOVA.Stat <- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p,
-                        para, CPU, seed){
+                        para, CPU, seed, wild.type = "Normal"){
   
   N <- sum(n)
   H <- hypo_matrix
@@ -68,8 +68,8 @@ MANOVA.Stat <- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups,
     meansP <- list()
     for (i in 1:n.groups){
       y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
-      epsi <- 2*rbinom(n[i], 1, 1/2)-1
-      xperm[[i]] <- epsi*(y - colMeans(y))
+      epsi <- if (wild.type == "Rademacher") 2*rbinom(n[i], 1, 1/2)-1 else rnorm(n[i])
+      xperm[[i]] <- epsi*sweep(y, 2, colMeans(y))
       VP[[i]] <- 1 / n[i] * cov(xperm[[i]])
       meansP[[i]] <- colMeans(xperm[[i]])
     }
@@ -127,7 +127,7 @@ MANOVA.Stat <- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups,
   
   
   #------------------------ p-values -------------------------------#
-  p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
+  p_valueWTS <- pchisq(abs(WTS), df = df_WTS, lower.tail = FALSE)
   
   #--------------------- Quantiles -------------------------------#
   quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
@@ -153,7 +153,7 @@ MANOVA.Stat <- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups,
 # MANOVA.Stat.wide is mathematically identical to multRM.Statistic with t = 1
 # (one observation per time point, i.e. no repeated measures within groups).
 MANOVA.Stat.wide <- function(Y, n, hypo_matrix, iter, alpha, resampling,
-                             para, CPU, seed, p){
+                             para, CPU, seed, p, wild.type = "Normal"){
   multRM.Statistic(Y, n, hypo_matrix, iter, alpha, resampling,
-                   para, CPU, seed, p, t = 1)
+                   para, CPU, seed, p, t = 1, wild.type = wild.type)
 }

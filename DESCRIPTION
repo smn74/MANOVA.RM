@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Resampling-Based Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.6.0
-Date: 2026-09-03
+Version: 0.6.1
+Date: 2026-10-19
 Authors@R: c(person(given = "Sarah",
                       family = "Friedrich",
                       role = c("aut", "cre"),

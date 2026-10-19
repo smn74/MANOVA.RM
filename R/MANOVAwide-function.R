@@ -14,9 +14,12 @@
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
-#' @param resampling The resampling method to be used, one of "paramBS"
-#'   (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
-#'   Rademacher weights). The Wild Bootstrap is calculated for all test statistics.
+#' @param resampling The resampling method to be used, one of \code{"paramBS"}
+#'   (parametric bootstrap approach) and \code{"WildBS"} (wild bootstrap approach).
+#'   The type of wild bootstrap weights can be controlled via \code{wild.type}.
+#' @param wild.type The type of weights used for the Wild Bootstrap. One of
+#'   \code{"Normal"} (standard normal, default) or \code{"Rademacher"} (\eqn{\pm 1}
+#'   with equal probability). Only used when \code{resampling = "WildBS"}.
 #' @param para If parallel computing should be used. Default is FALSE.
 #' @param CPU The number of cores used for parallel computing. If not specified, cores
 #'  are detected via \code{\link[parallel]{detectCores}}.
@@ -54,12 +57,17 @@
 #' @export
 
 MANOVA.wide <- function(formula, data,
-                   iter = 10000, alpha = 0.05, resampling = "paramBS", 
+                   iter = 10000, alpha = 0.05, resampling = "paramBS",
+                   wild.type = "Normal",
                    para = FALSE, CPU = NULL,
                    seed = NULL, nested.levels.unique = FALSE, dec = 3, ...){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
+  }
+
+  if (resampling == "WildBS"){
+    wild.type <- match.arg(wild.type, c("Normal", "Rademacher"))
   }
 
   output <- list()
@@ -71,7 +79,8 @@ MANOVA.wide <- function(formula, data,
   }
   
   input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
+                     iter = iter, alpha = alpha, resampling = resampling,
+                     wild.type = wild.type, seed = seed)
   
   dat <- model.frame(formula, data)
   nr_hypo <- attr(terms(formula), "factors")
@@ -234,7 +243,8 @@ MANOVA.wide <- function(formula, data,
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat.wide(Y2, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, para, CPU, seed, p)
+                             iter, alpha, resampling, para, CPU, seed, p,
+                             wild.type = wild.type)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)

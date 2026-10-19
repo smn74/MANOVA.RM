@@ -1,3 +1,9 @@
+# MANOVA.RM 0.6.1
+  * fixed bug in Wild bootstrap routine (correct centering) and calculation of
+  WTS p-value
+  * added possibility to choose type of wild bootstrap weights (normal or Rademacher)
+  
+
 # MANOVA.RM 0.6.0
   * `seed` and `CPU` are now `NULL` by default in all main functions; previously `set.seed(0)` was silently called
   on every run, even when no seed was specified.

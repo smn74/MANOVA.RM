@@ -12,6 +12,7 @@ multRM(
   iter = 10000,
   alpha = 0.05,
   resampling = "paramBS",
+  wild.type = "Normal",
   para = FALSE,
   CPU = NULL,
   seed = NULL,
@@ -38,8 +39,13 @@ statistic. The default option is 10,000.}
 
 \item{alpha}{A number specifying the significance level; the default is 0.05.}
 
-\item{resampling}{The resampling method to be used, one of "paramBS" (parametric bootstrap
-approach) and "WildBS" (wild bootstrap approach with Rademacher weights).}
+\item{resampling}{The resampling method to be used, one of \code{"paramBS"} (parametric bootstrap
+approach) and \code{"WildBS"} (wild bootstrap approach). The type of wild bootstrap weights
+can be controlled via \code{wild.type}.}
+
+\item{wild.type}{The type of weights used for the Wild Bootstrap. One of
+\code{"Normal"} (standard normal, default) or \code{"Rademacher"} (\eqn{\pm 1}
+with equal probability). Only used when \code{resampling = "WildBS"}.}
 
 \item{para}{If parallel computing should be used. Default is FALSE.}
 

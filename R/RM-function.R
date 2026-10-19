@@ -21,10 +21,13 @@
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
-#' @param resampling The resampling method to be used, one of "Perm" (randomly permute 
-#'    all observations), "paramBS" (parametric bootstrap approach) and "WildBS" 
-#'    (wild bootstrap approach with Rademacher weights). Except for the Wild Bootstrap,
-#'    all methods are applied to the WTS only.
+#' @param resampling The resampling method to be used, one of \code{"Perm"} (randomly permute 
+#'    all observations), \code{"paramBS"} (parametric bootstrap approach) and \code{"WildBS"} 
+#'    (wild bootstrap approach). The type of wild bootstrap weights can be controlled via
+#'    \code{wild.type}. Except for the Wild Bootstrap, all methods are applied to the WTS only.
+#' @param wild.type The type of weights used for the Wild Bootstrap. One of
+#'   \code{"Normal"} (standard normal, default) or \code{"Rademacher"} (\eqn{\pm 1}
+#'   with equal probability). Only used when \code{resampling = "WildBS"}.
 #' @param para If parallel computing should be used. Default is FALSE.
 #' @param CPU The number of cores used for parallel computing. If not specified, cores
 #'  are detected via \code{\link[parallel]{detectCores}}.
@@ -113,7 +116,7 @@
 #' 
 #'
 #' @importFrom graphics axis legend par plot title
-#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom
+#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom rnorm
 #' @importFrom utils read.table
 #' @importFrom methods hasArg
 #' @importFrom MASS mvrnorm
@@ -123,9 +126,10 @@
 #' @export
 
 RM <- function(formula, data, subject,
-               within, no.subf, iter = 10000, alpha = 0.05, 
+               within, no.subf, iter = 10000, alpha = 0.05,
                resampling = "Perm",
-               para = FALSE, CPU = NULL, seed = NULL, 
+               wild.type = "Normal",
+               para = FALSE, CPU = NULL, seed = NULL,
                CI.method = "t-quantile", dec = 3){
   
   if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
@@ -134,6 +138,10 @@ RM <- function(formula, data, subject,
   
   if (!(CI.method %in% c("t-quantile", "resampling"))){
     stop("CI.method must be one of 't-quantile' or 'resampling'!")
+  }
+
+  if (resampling == "WildBS"){
+    wild.type <- match.arg(wild.type, c("Normal", "Rademacher"))
   }
   
   if(para){
@@ -146,7 +154,8 @@ RM <- function(formula, data, subject,
   
   input_list <- list(formula = formula, data = data,
                      subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling, 
+                     iter = iter, alpha = alpha, resampling = resampling,
+                     wild.type = wild.type,
                      seed = seed)
   #----------------------------------------------------------------------------------#
   # Determine names of within-subject factors if not given
@@ -199,7 +208,8 @@ RM <- function(formula, data, subject,
   for (i in 1:length(hypo_matrices)) {
     results <- RM.Stat(Y = Yw2, nind, hypo_matrices[[i]],
                        iter, alpha, iii = i, whole_count, n.sub = lev.sub,
-                       resampling, para, CPU, seed, CI.method)
+                       resampling, para, CPU, seed, CI.method,
+                       wild.type = wild.type)
     WTS_out[i, ] <- round(results$WTS, dec)
     ATS_out[i, ] <- round(results$ATS, dec)
     WTPS_out[i, ] <- round(results$WTPS, dec)

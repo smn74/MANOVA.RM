@@ -1,6 +1,6 @@
 ## function for calculating test statistics, permutation etc for repeated measures
 RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, 
-                  resampling, para, CPU, seed, CI.method){
+                  resampling, para, CPU, seed, CI.method, wild.type = "Normal"){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -94,8 +94,8 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
     xperm <- list(NA)
     meansP <- list()
     for (i in 1:a){
-      epsi <- 2*rbinom(nind[i], 1, 1/2)-1
-      xperm[[i]] <- epsi*(Y[[i]] - colMeans(Y[[i]]))
+      epsi <- if (wild.type == "Rademacher") 2*rbinom(nind[i], 1, 1/2)-1 else rnorm(nind[i])
+      xperm[[i]] <- epsi*sweep(Y[[i]], 2, colMeans(Y[[i]]))
       VP[[i]] <- 1 / nind[i] * cov(xperm[[i]])
       meansP[[i]] <- colMeans(xperm[[i]])
     }
@@ -160,8 +160,8 @@ RM.Stat<- function(Y, nind, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub,
   quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
   
   #------------------------ p-values -------------------------------#
-  p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
-  p_valueATS <- 1 - pf(abs(ATS), df1 = df_ATS, df2 = df_ATS2)
+  p_valueWTS <- pchisq(abs(WTS), df = df_WTS, lower.tail = FALSE)
+  p_valueATS <- pf(abs(ATS), df1 = df_ATS, df2 = df_ATS2, lower.tail = FALSE)
   
   #---------------------- CIs -------------------------------------#
   if (CI.method == "t-quantile"){

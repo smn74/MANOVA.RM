@@ -17,8 +17,12 @@
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
-#' @param resampling The resampling method to be used, one of "paramBS" (parametric bootstrap
-#'   approach) and "WildBS" (wild bootstrap approach with Rademacher weights).
+#' @param resampling The resampling method to be used, one of \code{"paramBS"} (parametric bootstrap
+#'   approach) and \code{"WildBS"} (wild bootstrap approach). The type of wild bootstrap weights
+#'   can be controlled via \code{wild.type}.
+#' @param wild.type The type of weights used for the Wild Bootstrap. One of
+#'   \code{"Normal"} (standard normal, default) or \code{"Rademacher"} (\eqn{\pm 1}
+#'   with equal probability). Only used when \code{resampling = "WildBS"}.
 #' @param para If parallel computing should be used. Default is FALSE.
 #' @param CPU The number of cores used for parallel computing. If not specified, cores
 #'  are detected via \code{\link[parallel]{detectCores}}.
@@ -81,7 +85,7 @@
 #'   heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 #'
 #' @importFrom graphics axis legend par plot title
-#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom
+#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom rnorm
 #' @importFrom utils read.table
 #' @importFrom MASS mvrnorm
 #' @importFrom parallel makeCluster parSapply detectCores
@@ -91,10 +95,15 @@
 
 multRM <- function(formula, data, subject, within,
                    iter = 10000, alpha = 0.05, resampling = "paramBS",
+                   wild.type = "Normal",
                    para = FALSE, CPU = NULL, seed = NULL, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
+  }
+
+  if (resampling == "WildBS"){
+    wild.type <- match.arg(wild.type, c("Normal", "Rademacher"))
   }
   
   if(para){
@@ -106,7 +115,8 @@ multRM <- function(formula, data, subject, within,
 
   
   input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
+                     iter = iter, alpha = alpha, resampling = resampling,
+                     wild.type = wild.type, seed = seed)
   #--------------------------------------------------------------------------------#
   # prepare data for the calculations
   prepdt <- prepare.data(formula, data, subject, within)
@@ -136,9 +146,10 @@ multRM <- function(formula, data, subject, within,
   colnames(quantiles) <- c("WTS_resampling", "MATS_resampling")
   # calculate results
   for (i in 1:length(hypo_matrices)) {
-    results <- multRM.Statistic(Yw2, nind, hypo_matrices[[i]], iter, alpha, resampling, 
+    results <- multRM.Statistic(Yw2, nind, hypo_matrices[[i]], iter, alpha, resampling,
                                 para, CPU,
-                                seed, p, t=prod(fl[within]))
+                                seed, p, t=prod(fl[within]),
+                                wild.type = wild.type)
     WTS_out[i, ] <- round(results$WTS, dec)
     WTPS_out[i, ] <- round(results$WTPS, dec)
     MATS_out[i] <- round(results$MATS, dec)

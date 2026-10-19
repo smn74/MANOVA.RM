@@ -41,7 +41,7 @@ Note that a combination of both types of data, i.e., multivariate longitudinal d
 The `RM` function calculates the WTS and ATS in a repeated measures design with an arbitrary number of crossed whole-plot (between-subject) and 
 sub-plot (within-subject) factors.
 The resampling methods provided are a permutation procedure, a parametric bootstrap approach and a
-wild bootstrap using Rademacher weights. The permutation procedure provides no valid approach for the ATS and is thus not implemented.
+wild bootstrap (see the section on Wild Bootstrap weights below for available weight distributions). The permutation procedure provides no valid approach for the ATS and is thus not implemented.
 
 ### Data Example 1 (One between-subject and two within-subject factors)
 
@@ -71,8 +71,11 @@ The `RM` function takes as arguments:
 within-subjects factors can be directly specified using `within`.
 * `iter`: The number of iterations for the resampling approach. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.
-* `resampling`: The resampling method, one of 'Perm', 'paramBS' or 'WildBS'. Default is
-set to 'Perm'.
+* `resampling`: The resampling method, one of `'Perm'`, `'paramBS'` or `'WildBS'`. Default is
+  `'Perm'`. The type of weights used by the Wild Bootstrap can be controlled via `wild.type`.
+* `wild.type`: The distribution of the Wild Bootstrap weights, either `"Normal"`
+  (standard normal, default) or `"Rademacher"` ($\pm 1$ with equal probability).
+  Only relevant when `resampling = "WildBS"`.
 * `para`: A logical indicating whether parallel computing should be used. Default is `FALSE`.
 * `CPU`: The number of cores used for parallel computing. If not specified, cores are detected automatically.
 * `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set. Note that the 
@@ -141,7 +144,7 @@ The `MANOVA` function calculates the WTS for multivariate data in a design with 
 Additionally, a modified ANOVA-type statistic (MATS) is calculated which has the additional advantage of being applicable to designs
 involving singular covariance matrices and is invariant under scale transformations of the data, see Friedrich and Pauly (2018) for details.
 The resampling methods provided are a parametric bootstrap approach and a
-wild bootstrap using Rademacher weights. 
+wild bootstrap (see the section on Wild Bootstrap weights below for details).
 Note that only balanced nested designs (i.e., the same number of factor levels $b$ for each level of the factor $A$) with up to three factors are 
 implemented. Designs involving both crossed and nested factors are not implemented. Data must be provided in long format (for wide format, see `MANOVA.wide` below).
 
@@ -159,8 +162,11 @@ The most important arguments of the `MANOVA` function are:
 variables of interest on the right hand side.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `resampling`: The resampling method, one of 'paramBS' and 'WildBS'. Default is
-set to 'paramBS'.
+* `resampling`: The resampling method, one of `'paramBS'` and `'WildBS'`. Default is
+  `'paramBS'`. The type of weights used by the Wild Bootstrap can be controlled via `wild.type`.
+* `wild.type`: The distribution of the Wild Bootstrap weights, either `"Normal"`
+  (standard normal, default) or `"Rademacher"` ($\pm 1$ with equal probability).
+  Only relevant when `resampling = "WildBS"`.
 * `nested.levels.unique`: For nested designs only: A logical specifying whether the levels of the nested factor(s) are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested factor are the same for each level of the main factor. For an example and more explanations see the GFD package and the corresponding vignette.
 
 ```{r}
@@ -337,8 +343,12 @@ different groups of between-subject factors must have individual labels.
 * `iter`: The number of iterations used for calculating the resampled 
    statistic. The default option is 10,000.
 * `alpha`: A number specifying the significance level; the default is 0.05.
-* `resampling`: The resampling method to be used, one of "paramBS" (parametric bootstrap
-   approach) and "WildBS" (wild bootstrap approach with Rademacher weights).
+* `resampling`: The resampling method to be used, one of `"paramBS"` (parametric bootstrap
+   approach) and `"WildBS"` (wild bootstrap approach). The type of weights used by the Wild
+   Bootstrap can be controlled via `wild.type`.
+* `wild.type`: The distribution of the Wild Bootstrap weights, either `"Normal"`
+   (standard normal, default) or `"Rademacher"` ($\pm 1$ with equal probability).
+   Only relevant when `resampling = "WildBS"`.
 * `para`: Logical, indicating whether parallel computing should be used. Default is FALSE.
 * `CPU`: The number of cores used for parallel computing. If omitted, cores are
   detected automatically.
@@ -385,6 +395,41 @@ parameters.
 For the `multRM()` function there is no GUI available yet.
 -->
 
+## Wild Bootstrap weights
+
+When `resampling = "WildBS"` is chosen, pseudo-samples are constructed as follows.
+For each group $i$, the observations $X_{ik}$ are first centered by subtracting the
+group mean,
+$$\tilde{X}_{ik} = X_{ik} - \bar{X}_{i\cdot},$$
+and then multiplied by i.i.d.\ random scalar weights $\varepsilon_{ik}$:
+$$X^*_{ik} = \varepsilon_{ik} \cdot \tilde{X}_{ik}.$$
+The test statistics are then computed from these pseudo-samples $\{X^*_{ik}\}$ in
+the same way as from the original data.
+
+The distribution of the weights is controlled by the `wild.type` argument:
+
+* **`"Normal"` (default):** $\varepsilon_{ik} \overset{\text{iid}}{\sim} N(0,1)$.
+  Standard normal weights yield a continuous bootstrap distribution and are the
+  recommended default.
+* **`"Rademacher"`:** $\varepsilon_{ik} \in \{-1, +1\}$ with equal probability
+  $\tfrac{1}{2}$. These are the classical wild bootstrap weights and remain
+  available as an alternative.
+
+**Note on small group sizes with Rademacher weights.** After centering, a group
+with only $n_i = 2$ observations has residuals $\{\tilde{r},\, -\tilde{r}\}$ for some
+vector $\tilde{r}$. With Rademacher weights the possible pseudo-samples are
+$\{+\tilde{r},\, -\tilde{r}\}$ and $\{-\tilde{r},\, +\tilde{r}\}$, both with the same
+variance. Moreover, exactly half of all bootstrap draws yield sign flips
+$\{+1, +1\}$ or $\{-1, -1\}$, producing a pseudo-sample with zero mean and
+potentially degenerate bootstrap distributions. Standard normal weights avoid
+this issue because each observation receives an independently drawn continuous weight.
+
+## Which resampling approach should I choose?
+
+The `MANOVA.RM` package provides different resampling approaches, which in some cases might lead to different conclusions. So the question is: for a given research question, which resampling approach is most appropriate? Some results from the literature giving guidance on this issue are summarized below:
+
+* Geroldinger et al. (2026) conducted a neutral comparison study on approaches for analyzing multivariate data, including the approaches implemented in MANOVA.RM. They found the parametric bootstrap approach for the MATS to combine appropriate type-I error control with competitive power across a range of scenarios.
+
 ## References
 
 * Bathke, A. et al. (2018).
@@ -405,3 +450,5 @@ For the `multRM()` function there is no GUI available yet.
 * Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
   of Multivariate Analysis, 140, 291-301.  
+  
+* Geroldinger, M., Laimer, M., Wally, V., Bauer, J.W., and Zimmermann, G. (2026). A neutral comparison of multivariate hypothesis tests for parallel group designs in rare disease settings. Statistics in Medicine.

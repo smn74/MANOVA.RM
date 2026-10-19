@@ -14,9 +14,12 @@
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
-#' @param resampling The resampling method to be used, one of "paramBS"
-#'   (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
-#'   Rademacher weights).
+#' @param resampling The resampling method to be used, one of \code{"paramBS"}
+#'   (parametric bootstrap approach) and \code{"WildBS"} (wild bootstrap approach).
+#'   The type of wild bootstrap weights can be controlled via \code{wild.type}.
+#' @param wild.type The type of weights used for the Wild Bootstrap. One of
+#'   \code{"Normal"} (standard normal, default) or \code{"Rademacher"} (\eqn{\pm 1}
+#'   with equal probability). Only used when \code{resampling = "WildBS"}.
 #' @param para If parallel computing should be used. Default is FALSE.
 #' @param CPU The number of cores used for parallel computing. If not specified, cores
 #'  are detected via \code{\link[parallel]{detectCores}}.
@@ -87,7 +90,7 @@
 #'    
 #'   
 #' @importFrom graphics axis legend par plot title abline points
-#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom quantile as.formula
+#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom rnorm quantile as.formula
 #' @importFrom utils read.table
 #' @importFrom MASS mvrnorm
 #' @importFrom parallel makeCluster parSapply detectCores
@@ -96,12 +99,17 @@
 #' @export
 
 MANOVA <- function(formula, data, subject,
-                   iter = 10000, alpha = 0.05, resampling = "paramBS", 
+                   iter = 10000, alpha = 0.05, resampling = "paramBS",
+                   wild.type = "Normal",
                    para = FALSE, CPU = NULL,
                    seed = NULL, nested.levels.unique = FALSE, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
+  }
+
+  if (resampling == "WildBS"){
+    wild.type <- match.arg(wild.type, c("Normal", "Rademacher"))
   }
   
   if(sum(grepl("cbind", formula)) != 0){
@@ -116,7 +124,8 @@ MANOVA <- function(formula, data, subject,
   
   input_list <- list(formula = formula, data = data,
                      subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
+                     iter = iter, alpha = alpha, resampling = resampling,
+                     wild.type = wild.type, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -158,7 +167,8 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha,
-                           resampling, n.groups = fl, p, para, CPU, seed)
+                           resampling, n.groups = fl, p, para, CPU, seed,
+                           wild.type = wild.type)
     WTS_out[1, ] <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
@@ -294,7 +304,7 @@ MANOVA <- function(formula, data, subject,
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
                              iter, alpha, resampling, n.groups, p,
-                             para, CPU, seed)
+                             para, CPU, seed, wild.type = wild.type)
       WTS_out[i, ] <- round(results$WTS, dec)
       WTPS_out[i, ] <- round(results$WTPS, dec)
       MATS_out[i] <- round(results$MATS, dec)

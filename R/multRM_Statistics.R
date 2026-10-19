@@ -5,7 +5,7 @@
 # nind: number of individuals
 
 multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
-                             para, CPU, seed, p, t){
+                             para, CPU, seed, p, t, wild.type = "Normal"){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -63,8 +63,8 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
     xperm <- list(NA)
     meansP <- list()
     for (i in 1:a){
-      epsi <- 2*rbinom(nind[i], 1, 1/2)-1
-      xperm[[i]] <- epsi*(Y[[i]] - colMeans(Y[[i]]))
+      epsi <- if (wild.type == "Rademacher") 2*rbinom(nind[i], 1, 1/2)-1 else rnorm(nind[i])
+      xperm[[i]] <- epsi*sweep(Y[[i]], 2, colMeans(Y[[i]]))
       VP[[i]] <- 1 / nind[i] * cov(xperm[[i]])
       meansP[[i]] <- colMeans(xperm[[i]])
     }
@@ -124,7 +124,7 @@ multRM.Statistic <- function(Y, nind, hypo_matrix, iter, alpha, resampling,
   
   
   #------------------------ p-values -------------------------------#
-  p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
+  p_valueWTS <- pchisq(abs(WTS), df = df_WTS, lower.tail = FALSE)
   #--------------------- Quantiles -------------------------------#
   quant_WTS <- quantile(ecdf_WTPS, 1-alpha)
   quant_MATS <- quantile(ecdf_MATS, 1-alpha)
